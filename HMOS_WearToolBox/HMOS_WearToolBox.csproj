@@ -8,11 +8,13 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Version>1.0.0-Alpha</Version>
     <ApplicationIcon>Resources\Icon\ICON_256.ico</ApplicationIcon>
+	<IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
   </PropertyGroup>
 
   <ItemGroup>
     <None Remove="Resources\app_names.json" />
     <None Remove="Resources\hdc.exe" />
+    <None Remove="Resources\libusb_shared.dll" />
   </ItemGroup>
 
   <ItemGroup>
@@ -22,6 +24,7 @@
   <ItemGroup>
     <EmbeddedResource Include="Resources\app_names.json" />
     <EmbeddedResource Include="Resources\hdc.exe" />
+    <EmbeddedResource Include="Resources\libusb_shared.dll" />
   </ItemGroup>
 
   <ItemGroup>

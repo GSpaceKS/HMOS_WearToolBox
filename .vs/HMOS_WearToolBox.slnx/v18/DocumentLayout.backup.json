@@ -1,12 +1,41 @@
 {
   "Version": 1,
   "WorkspaceRootPath": "D:\\Visual Studio Program\\HMOS_WearToolBox\\",
-  "Documents": [],
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{98D554CB-060F-F83A-7E0C-C9DFE7C93657}|HMOS_WearToolBox\\HMOS_WearToolBox.csproj|d:\\visual studio program\\hmos_weartoolbox\\hmos_weartoolbox\\helper\\hdchelper.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{98D554CB-060F-F83A-7E0C-C9DFE7C93657}|HMOS_WearToolBox\\HMOS_WearToolBox.csproj|solutionrelative:hmos_weartoolbox\\helper\\hdchelper.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
   "DocumentGroupContainers": [
     {
       "Orientation": 0,
       "VerticalTabListWidth": 256,
-      "DocumentGroups": []
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 1,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{b1e99781-ab81-11d0-b683-00aa00a3ee26}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "HdcHelper.cs",
+              "DocumentMoniker": "D:\\Visual Studio Program\\HMOS_WearToolBox\\HMOS_WearToolBox\\Helper\\HdcHelper.cs",
+              "RelativeDocumentMoniker": "HMOS_WearToolBox\\Helper\\HdcHelper.cs",
+              "ToolTip": "D:\\Visual Studio Program\\HMOS_WearToolBox\\HMOS_WearToolBox\\Helper\\HdcHelper.cs",
+              "RelativeToolTip": "HMOS_WearToolBox\\Helper\\HdcHelper.cs",
+              "ViewState": "AgIAADsAAAAAAAAAAAAqwFsAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-25T15:42:44.156Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
     }
   ]
 }

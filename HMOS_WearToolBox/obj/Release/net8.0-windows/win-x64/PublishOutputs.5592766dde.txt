@@ -1,0 +1,7 @@
+D:\Visual Studio Program\Publish\HMOS_WearToolBox\HMOS_WearToolBox.pdb
+D:\Visual Studio Program\Publish\HMOS_WearToolBox\D3DCompiler_47_cor3.dll
+D:\Visual Studio Program\Publish\HMOS_WearToolBox\PenImc_cor3.dll
+D:\Visual Studio Program\Publish\HMOS_WearToolBox\PresentationNative_cor3.dll
+D:\Visual Studio Program\Publish\HMOS_WearToolBox\vcruntime140_cor3.dll
+D:\Visual Studio Program\Publish\HMOS_WearToolBox\wpfgfx_cor3.dll
+D:\Visual Studio Program\Publish\HMOS_WearToolBox\HMOS_WearToolBox.exe

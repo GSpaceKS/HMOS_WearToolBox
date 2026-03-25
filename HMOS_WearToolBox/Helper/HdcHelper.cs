@@ -2,13 +2,13 @@
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
-using System.Windows.Forms; // 如果使用 Application.UserAppDataPath 需要
 
 namespace HMOS_WearToolBox.Helper
 {
     public static class HdcHelper
     {
         private static string hdcPath = null;
+        private static string libPath = null;
 
         /// <summary>
         /// 获取 hdc.exe 的路径（从嵌入资源释放到临时目录）
@@ -18,23 +18,42 @@ namespace HMOS_WearToolBox.Helper
             if (hdcPath != null && File.Exists(hdcPath))
                 return hdcPath;
 
+            // 使用一个专用子目录，避免与其他工具冲突
             string tempDir = Path.GetTempPath();
-            string exePath = Path.Combine(tempDir, "hdc.exe");
+            string toolDir = Path.Combine(tempDir, "HMOS_WearToolBox");
+            if (!Directory.Exists(toolDir))
+                Directory.CreateDirectory(toolDir);
+
+            string exePath = Path.Combine(toolDir, "hdc.exe");
+            string dllPath = Path.Combine(toolDir, "libusb_shared.dll");
+
+            // 释放 hdc.exe
             if (!File.Exists(exePath))
+                ExtractResource("HMOS_WearToolBox.Resources.hdc.exe", exePath);
+
+            // 释放 libusb_shared.dll
+            if (!File.Exists(dllPath))
+                ExtractResource("HMOS_WearToolBox.Resources.libusb_shared.dll", dllPath);
+
+            hdcPath = exePath;
+            libPath = dllPath;
+            return hdcPath;
+        }
+
+        /// <summary>
+        /// 从嵌入资源释放文件
+        /// </summary>
+        private static void ExtractResource(string resourceName, string outputPath)
+        {
+            using (Stream stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(resourceName))
             {
-                // 从嵌入资源释放
-                using (Stream stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("HMOS_WearToolBox.Resources.hdc.exe"))
+                if (stream == null)
+                    throw new Exception($"无法找到嵌入的资源：{resourceName}");
+                using (FileStream fs = new FileStream(outputPath, FileMode.Create))
                 {
-                    if (stream == null)
-                        throw new Exception("无法找到嵌入的资源：hdc.exe");
-                    using (FileStream fs = new FileStream(exePath, FileMode.Create))
-                    {
-                        stream.CopyTo(fs);
-                    }
+                    stream.CopyTo(fs);
                 }
             }
-            hdcPath = exePath;
-            return hdcPath;
         }
 
         /// <summary>
@@ -56,20 +75,18 @@ namespace HMOS_WearToolBox.Helper
         }
 
         /// <summary>
-        /// 清理临时目录中的 hdc.exe
+        /// 清理临时目录中的 hdc.exe 和 libusb_shared.dll
         /// </summary>
         public static void Cleanup()
         {
             if (hdcPath != null && File.Exists(hdcPath))
             {
-                try
-                {
-                    File.Delete(hdcPath);
-                }
-                catch { /* 忽略删除失败 */ }
+                try { File.Delete(hdcPath); } catch { }
+            }
+            if (libPath != null && File.Exists(libPath))
+            {
+                try { File.Delete(libPath); } catch { }
             }
         }
-
-
     }
 }
