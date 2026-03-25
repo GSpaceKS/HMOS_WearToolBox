@@ -2,7 +2,9 @@
 
 [![Release](https://img.shields.io/badge/Release-v1.0.0--Alpha-orange)](https://github.com/GSpaceKS/HMOS_WearToolBox/releases)
 
-**HMOS Wear ToolBox** 是一款为鸿蒙手表（HarmonyOS NEXT）用户设计的 PC 端管理工具。通过 HDC（鸿蒙设备连接工具）与手表通信，提供设备信息查看、应用管理、HDC 终端等核心功能，无需安装，点开即用。
+**HMOS Wear ToolBox** 是一款为鸿蒙手表（HarmonyOS NEXT）用户设计的 PC 端管理工具。提供设备信息查看、应用管理、HDC 终端等核心功能，无需安装，点开即用。
+
+**ps：**使用了AI来辅助优化了代码。作为鄙人的第一个脱离老师课程外编写的项目。一开始的计划是在项目中边写边学，所以更新可能较慢。
 
 ---
 
