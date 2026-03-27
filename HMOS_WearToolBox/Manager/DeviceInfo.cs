@@ -10,5 +10,6 @@ namespace HMOS_WearToolBox.Manager
         public string IpAddress { get; set; } = "";
         public DateTime LastConnected { get; set; }
         public bool IsConnected { get; set; }
+        public bool IsNew { get; set; } = true;
     }
 }

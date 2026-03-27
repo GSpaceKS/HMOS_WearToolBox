@@ -22,6 +22,13 @@ namespace HMOS_WearToolBox.Manager
             {
                 string json = File.ReadAllText(dataPath);
                 devices = JsonSerializer.Deserialize<List<DeviceInfo>>(json) ?? new List<DeviceInfo>();
+                // 清除所有设备的 New 标记（重新启动后不再显示 NEW）
+                bool anyNew = devices.Any(d => d.IsNew);
+                if (anyNew)
+                {
+                    foreach (var d in devices) d.IsNew = false;
+                    Save();
+                }
             }
         }
 

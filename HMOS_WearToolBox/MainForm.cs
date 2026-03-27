@@ -68,6 +68,36 @@ namespace HMOS_WearToolBox
             softwareControl?.RefreshConnectionStatus();
         }
 
+        public void ForceRefreshSoftware()
+        {
+            softwareControl?.ForceRefresh();
+        }
+
+        /// <summary>
+        /// 更新 HomeControl 的自动刷新间隔（由设置页面调用）
+        /// </summary>
+        /// <param name="seconds">刷新间隔（秒）</param>
+        public void UpdateRefreshInterval(int seconds)
+        {
+            homeControl?.SetRefreshInterval(seconds);
+        }
+
+        /// <summary>
+        /// 自动更新开关
+        /// </summary>
+        /// <param name="enabled"></param>
+        public void SetAutoUpdateEnabled(bool enabled)
+        {
+            homeControl?.SetAutoUpdateEnabled(enabled);
+        }
+
+        /// <summary>
+        /// Terminal 字体、背景设置
+        /// </summary>
+        public void UpdateTerminalStyles()
+        {
+            terminalControl?.ApplySettings();
+        }
         private void MainForm_Load(object sender, EventArgs e) { }
     }
 }
