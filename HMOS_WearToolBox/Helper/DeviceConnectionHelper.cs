@@ -7,26 +7,39 @@ namespace HMOS_WearToolBox.Helper
 {
     public static class DeviceConnectionHelper
     {
+        private static DateTime _lastCheckTime = DateTime.MinValue;
+        private static bool _cachedOnline = false;
+        private static readonly object _lock = new object();
+
         public static bool CheckAndUpdateConnectionStatus()
         {
+            lock (_lock)
+            {
+                // 缓存有效期 500ms
+                if ((DateTime.Now - _lastCheckTime).TotalMilliseconds < 500)
+                    return _cachedOnline;
+            }
+
             var devices = DeviceManager.GetDevices();
             if (devices.Count == 0) return false;
 
-            // 复制列表以避免枚举时集合被修改
-            var devicesSnapshot = devices.ToList();
             string targets = HdcHelper.RunHdcCommand("list targets");
             bool anyOnline = false;
-
-            foreach (var device in devicesSnapshot)
+            foreach (var device in devices)
             {
-                string ipPart = device.IpAddress.Split(':')[0];
-                bool isOnline = targets.Contains(ipPart);
+                bool isOnline = targets.Contains(device.IpAddress.Split(':')[0]);
                 anyOnline = anyOnline || isOnline;
                 if (device.IsConnected != isOnline)
                 {
                     device.IsConnected = isOnline;
                     DeviceManager.UpdateDevice(device);
                 }
+            }
+
+            lock (_lock)
+            {
+                _cachedOnline = anyOnline;
+                _lastCheckTime = DateTime.Now;
             }
             return anyOnline;
         }

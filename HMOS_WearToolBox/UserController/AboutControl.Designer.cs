@@ -39,7 +39,8 @@
             labelSoftwareVersion = new Label();
             labelSoftwareVersionValue = new Label();
             tableLayoutPanelTop = new TableLayoutPanel();
-            labelSoftwareName = new Label();
+            labelSoftwareNameenUS = new Label();
+            labelSoftwareNamezhCN = new Label();
             panelMain.SuspendLayout();
             tableLayoutPanelButtom.SuspendLayout();
             tableLayoutPanelLink.SuspendLayout();
@@ -191,31 +192,45 @@
             // 
             // tableLayoutPanelTop
             // 
+            tableLayoutPanelTop.AutoSize = true;
             tableLayoutPanelTop.ColumnCount = 1;
             tableLayoutPanelTop.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
-            tableLayoutPanelTop.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 20F));
-            tableLayoutPanelTop.Controls.Add(labelSoftwareName, 0, 0);
+            tableLayoutPanelTop.Controls.Add(labelSoftwareNameenUS, 0, 0);
+            tableLayoutPanelTop.Controls.Add(labelSoftwareNamezhCN, 0, 1);
             tableLayoutPanelTop.Dock = DockStyle.Top;
             tableLayoutPanelTop.Location = new Point(0, 0);
             tableLayoutPanelTop.Name = "tableLayoutPanelTop";
-            tableLayoutPanelTop.RowCount = 1;
-            tableLayoutPanelTop.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
-            tableLayoutPanelTop.RowStyles.Add(new RowStyle(SizeType.Absolute, 20F));
-            tableLayoutPanelTop.Size = new Size(878, 150);
+            tableLayoutPanelTop.Padding = new Padding(5);
+            tableLayoutPanelTop.RowCount = 2;
+            tableLayoutPanelTop.RowStyles.Add(new RowStyle());
+            tableLayoutPanelTop.RowStyles.Add(new RowStyle());
+            tableLayoutPanelTop.Size = new Size(878, 163);
             tableLayoutPanelTop.TabIndex = 0;
             // 
-            // labelSoftwareName
+            // labelSoftwareNameenUS
             // 
-            labelSoftwareName.AutoSize = true;
-            labelSoftwareName.Dock = DockStyle.Fill;
-            labelSoftwareName.Font = new Font("Microsoft YaHei UI", 35F, FontStyle.Bold);
-            labelSoftwareName.Location = new Point(3, 0);
-            labelSoftwareName.Name = "labelSoftwareName";
-            labelSoftwareName.Padding = new Padding(10);
-            labelSoftwareName.Size = new Size(872, 150);
-            labelSoftwareName.TabIndex = 0;
-            labelSoftwareName.Text = "HMOS_WareToolBox";
-            labelSoftwareName.TextAlign = ContentAlignment.MiddleCenter;
+            labelSoftwareNameenUS.AutoSize = true;
+            labelSoftwareNameenUS.Dock = DockStyle.Fill;
+            labelSoftwareNameenUS.Font = new Font("Microsoft YaHei UI", 35F, FontStyle.Bold);
+            labelSoftwareNameenUS.Location = new Point(8, 5);
+            labelSoftwareNameenUS.Name = "labelSoftwareNameenUS";
+            labelSoftwareNameenUS.Padding = new Padding(10);
+            labelSoftwareNameenUS.Size = new Size(862, 113);
+            labelSoftwareNameenUS.TabIndex = 0;
+            labelSoftwareNameenUS.Text = "HMOS WareToolBox";
+            labelSoftwareNameenUS.TextAlign = ContentAlignment.MiddleCenter;
+            // 
+            // labelSoftwareNamezhCN
+            // 
+            labelSoftwareNamezhCN.AutoSize = true;
+            labelSoftwareNamezhCN.Dock = DockStyle.Fill;
+            labelSoftwareNamezhCN.Font = new Font("Microsoft YaHei UI", 15F, FontStyle.Bold);
+            labelSoftwareNamezhCN.Location = new Point(8, 118);
+            labelSoftwareNamezhCN.Name = "labelSoftwareNamezhCN";
+            labelSoftwareNamezhCN.Size = new Size(862, 40);
+            labelSoftwareNamezhCN.TabIndex = 1;
+            labelSoftwareNamezhCN.Text = "鸿蒙手表工具箱";
+            labelSoftwareNamezhCN.TextAlign = ContentAlignment.MiddleCenter;
             // 
             // AboutControl
             // 
@@ -225,6 +240,7 @@
             Name = "AboutControl";
             Size = new Size(878, 1017);
             panelMain.ResumeLayout(false);
+            panelMain.PerformLayout();
             tableLayoutPanelButtom.ResumeLayout(false);
             tableLayoutPanelButtom.PerformLayout();
             tableLayoutPanelLink.ResumeLayout(false);
@@ -241,7 +257,7 @@
 
         private Panel panelMain;
         private TableLayoutPanel tableLayoutPanelTop;
-        private Label labelSoftwareName;
+        private Label labelSoftwareNameenUS;
         private TableLayoutPanel tableLayoutPanelButtom;
         private Label labelName;
         private TableLayoutPanel tableLayoutPanelLink;
@@ -251,5 +267,6 @@
         private TableLayoutPanel tableLayoutPanelSoftwareVersion;
         private Label labelSoftwareVersion;
         private Label labelSoftwareVersionValue;
+        private Label labelSoftwareNamezhCN;
     }
 }

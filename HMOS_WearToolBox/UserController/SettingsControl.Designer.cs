@@ -54,6 +54,10 @@
             tableLayoutPanelTimeSetting = new TableLayoutPanel();
             numericUpDownAutoUpdateTime = new NumericUpDown();
             btnAutoUpdateControl = new Button();
+            labelGlobalFont = new Label();
+            tableLayoutPanelSoftwareFontSetting = new TableLayoutPanel();
+            comboBoxGlobalFont = new ComboBox();
+            btnGlobalFontRestoreDefault = new Button();
             colorDialog1 = new ColorDialog();
             panelMain.SuspendLayout();
             panelSave.SuspendLayout();
@@ -68,6 +72,7 @@
             panelTimeSetting.SuspendLayout();
             tableLayoutPanelTimeSetting.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)numericUpDownAutoUpdateTime).BeginInit();
+            tableLayoutPanelSoftwareFontSetting.SuspendLayout();
             SuspendLayout();
             // 
             // panelMain
@@ -112,9 +117,9 @@
             groupBoxTerminal.Controls.Add(tableLayoutPanelTerminalSetting);
             groupBoxTerminal.Dock = DockStyle.Top;
             groupBoxTerminal.Font = new Font("Microsoft YaHei UI", 12F, FontStyle.Bold);
-            groupBoxTerminal.Location = new Point(0, 150);
+            groupBoxTerminal.Location = new Point(0, 155);
             groupBoxTerminal.Name = "groupBoxTerminal";
-            groupBoxTerminal.Size = new Size(878, 292);
+            groupBoxTerminal.Size = new Size(878, 298);
             groupBoxTerminal.TabIndex = 1;
             groupBoxTerminal.TabStop = false;
             groupBoxTerminal.Text = "HDC 终端设置";
@@ -124,7 +129,7 @@
             panelRestoreDefault.AutoSize = true;
             panelRestoreDefault.Controls.Add(btnRestoreDefault);
             panelRestoreDefault.Dock = DockStyle.Top;
-            panelRestoreDefault.Location = new Point(3, 228);
+            panelRestoreDefault.Location = new Point(3, 234);
             panelRestoreDefault.Name = "panelRestoreDefault";
             panelRestoreDefault.Padding = new Padding(10);
             panelRestoreDefault.Size = new Size(872, 61);
@@ -157,6 +162,7 @@
             tableLayoutPanelTerminalSetting.Controls.Add(tableLayoutPanelChooseFontColor, 1, 2);
             tableLayoutPanelTerminalSetting.Controls.Add(tableLayoutPanelChooseTerminalColor, 1, 3);
             tableLayoutPanelTerminalSetting.Dock = DockStyle.Top;
+            tableLayoutPanelTerminalSetting.Font = new Font("Microsoft YaHei UI", 10F);
             tableLayoutPanelTerminalSetting.Location = new Point(3, 34);
             tableLayoutPanelTerminalSetting.Name = "tableLayoutPanelTerminalSetting";
             tableLayoutPanelTerminalSetting.Padding = new Padding(10);
@@ -166,7 +172,7 @@
             tableLayoutPanelTerminalSetting.RowStyles.Add(new RowStyle());
             tableLayoutPanelTerminalSetting.RowStyles.Add(new RowStyle());
             tableLayoutPanelTerminalSetting.RowStyles.Add(new RowStyle(SizeType.Absolute, 20F));
-            tableLayoutPanelTerminalSetting.Size = new Size(872, 194);
+            tableLayoutPanelTerminalSetting.Size = new Size(872, 200);
             tableLayoutPanelTerminalSetting.TabIndex = 0;
             // 
             // labelFont
@@ -203,7 +209,7 @@
             labelFontColor.Location = new Point(13, 92);
             labelFontColor.Name = "labelFontColor";
             labelFontColor.Padding = new Padding(5);
-            labelFontColor.Size = new Size(420, 46);
+            labelFontColor.Size = new Size(420, 49);
             labelFontColor.TabIndex = 2;
             labelFontColor.Text = "字体颜色";
             labelFontColor.TextAlign = ContentAlignment.MiddleCenter;
@@ -213,10 +219,10 @@
             labelTerminalBackgroundColor.AutoSize = true;
             labelTerminalBackgroundColor.Dock = DockStyle.Fill;
             labelTerminalBackgroundColor.Font = new Font("Microsoft YaHei UI", 12F);
-            labelTerminalBackgroundColor.Location = new Point(13, 138);
+            labelTerminalBackgroundColor.Location = new Point(13, 141);
             labelTerminalBackgroundColor.Name = "labelTerminalBackgroundColor";
             labelTerminalBackgroundColor.Padding = new Padding(5);
-            labelTerminalBackgroundColor.Size = new Size(420, 46);
+            labelTerminalBackgroundColor.Size = new Size(420, 49);
             labelTerminalBackgroundColor.TabIndex = 3;
             labelTerminalBackgroundColor.Text = "终端背景色";
             labelTerminalBackgroundColor.TextAlign = ContentAlignment.MiddleCenter;
@@ -256,15 +262,16 @@
             tableLayoutPanelChooseFontColor.Name = "tableLayoutPanelChooseFontColor";
             tableLayoutPanelChooseFontColor.RowCount = 1;
             tableLayoutPanelChooseFontColor.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
-            tableLayoutPanelChooseFontColor.Size = new Size(420, 40);
+            tableLayoutPanelChooseFontColor.Size = new Size(420, 43);
             tableLayoutPanelChooseFontColor.TabIndex = 6;
             // 
             // buttonChooseFontColor
             // 
+            buttonChooseFontColor.AutoSize = true;
             buttonChooseFontColor.Font = new Font("Microsoft YaHei UI", 10F);
             buttonChooseFontColor.Location = new Point(305, 3);
             buttonChooseFontColor.Name = "buttonChooseFontColor";
-            buttonChooseFontColor.Size = new Size(112, 34);
+            buttonChooseFontColor.Size = new Size(112, 37);
             buttonChooseFontColor.TabIndex = 0;
             buttonChooseFontColor.Text = "选择颜色";
             buttonChooseFontColor.UseVisualStyleBackColor = true;
@@ -275,7 +282,7 @@
             panelShowFontColor.Dock = DockStyle.Fill;
             panelShowFontColor.Location = new Point(3, 3);
             panelShowFontColor.Name = "panelShowFontColor";
-            panelShowFontColor.Size = new Size(296, 34);
+            panelShowFontColor.Size = new Size(296, 37);
             panelShowFontColor.TabIndex = 1;
             // 
             // tableLayoutPanelChooseTerminalColor
@@ -287,19 +294,20 @@
             tableLayoutPanelChooseTerminalColor.Controls.Add(buttonChooseTerminalBackgroundColor, 1, 0);
             tableLayoutPanelChooseTerminalColor.Controls.Add(panelShowTerminalBackgroundColor, 0, 0);
             tableLayoutPanelChooseTerminalColor.Dock = DockStyle.Fill;
-            tableLayoutPanelChooseTerminalColor.Location = new Point(439, 141);
+            tableLayoutPanelChooseTerminalColor.Location = new Point(439, 144);
             tableLayoutPanelChooseTerminalColor.Name = "tableLayoutPanelChooseTerminalColor";
             tableLayoutPanelChooseTerminalColor.RowCount = 1;
             tableLayoutPanelChooseTerminalColor.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
-            tableLayoutPanelChooseTerminalColor.Size = new Size(420, 40);
+            tableLayoutPanelChooseTerminalColor.Size = new Size(420, 43);
             tableLayoutPanelChooseTerminalColor.TabIndex = 7;
             // 
             // buttonChooseTerminalBackgroundColor
             // 
+            buttonChooseTerminalBackgroundColor.AutoSize = true;
             buttonChooseTerminalBackgroundColor.Font = new Font("Microsoft YaHei UI", 10F);
             buttonChooseTerminalBackgroundColor.Location = new Point(305, 3);
             buttonChooseTerminalBackgroundColor.Name = "buttonChooseTerminalBackgroundColor";
-            buttonChooseTerminalBackgroundColor.Size = new Size(112, 34);
+            buttonChooseTerminalBackgroundColor.Size = new Size(112, 37);
             buttonChooseTerminalBackgroundColor.TabIndex = 0;
             buttonChooseTerminalBackgroundColor.Text = "选择颜色";
             buttonChooseTerminalBackgroundColor.UseVisualStyleBackColor = true;
@@ -310,36 +318,42 @@
             panelShowTerminalBackgroundColor.Dock = DockStyle.Fill;
             panelShowTerminalBackgroundColor.Location = new Point(3, 3);
             panelShowTerminalBackgroundColor.Name = "panelShowTerminalBackgroundColor";
-            panelShowTerminalBackgroundColor.Size = new Size(296, 34);
+            panelShowTerminalBackgroundColor.Size = new Size(296, 37);
             panelShowTerminalBackgroundColor.TabIndex = 0;
             // 
             // groupBoxGlobal
             // 
+            groupBoxGlobal.AutoSize = true;
             groupBoxGlobal.Controls.Add(tableLayoutPanelGlobalSetting);
             groupBoxGlobal.Dock = DockStyle.Top;
             groupBoxGlobal.Font = new Font("Microsoft YaHei UI", 12F, FontStyle.Bold);
             groupBoxGlobal.Location = new Point(0, 0);
             groupBoxGlobal.Name = "groupBoxGlobal";
-            groupBoxGlobal.Size = new Size(878, 150);
+            groupBoxGlobal.Size = new Size(878, 155);
             groupBoxGlobal.TabIndex = 0;
             groupBoxGlobal.TabStop = false;
             groupBoxGlobal.Text = "软件全局设置";
             // 
             // tableLayoutPanelGlobalSetting
             // 
+            tableLayoutPanelGlobalSetting.AutoSize = true;
             tableLayoutPanelGlobalSetting.ColumnCount = 2;
             tableLayoutPanelGlobalSetting.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
             tableLayoutPanelGlobalSetting.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
             tableLayoutPanelGlobalSetting.Controls.Add(labelSetAutoUpdateTime, 0, 0);
             tableLayoutPanelGlobalSetting.Controls.Add(panelTimeSetting, 1, 0);
+            tableLayoutPanelGlobalSetting.Controls.Add(labelGlobalFont, 0, 1);
+            tableLayoutPanelGlobalSetting.Controls.Add(tableLayoutPanelSoftwareFontSetting, 1, 1);
             tableLayoutPanelGlobalSetting.Dock = DockStyle.Fill;
+            tableLayoutPanelGlobalSetting.Font = new Font("Microsoft YaHei UI", 10F);
             tableLayoutPanelGlobalSetting.Location = new Point(3, 34);
             tableLayoutPanelGlobalSetting.Name = "tableLayoutPanelGlobalSetting";
             tableLayoutPanelGlobalSetting.Padding = new Padding(10);
-            tableLayoutPanelGlobalSetting.RowCount = 2;
+            tableLayoutPanelGlobalSetting.RowCount = 3;
+            tableLayoutPanelGlobalSetting.RowStyles.Add(new RowStyle());
             tableLayoutPanelGlobalSetting.RowStyles.Add(new RowStyle());
             tableLayoutPanelGlobalSetting.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
-            tableLayoutPanelGlobalSetting.Size = new Size(872, 113);
+            tableLayoutPanelGlobalSetting.Size = new Size(872, 118);
             tableLayoutPanelGlobalSetting.TabIndex = 0;
             // 
             // labelSetAutoUpdateTime
@@ -350,7 +364,7 @@
             labelSetAutoUpdateTime.Location = new Point(13, 10);
             labelSetAutoUpdateTime.Name = "labelSetAutoUpdateTime";
             labelSetAutoUpdateTime.Padding = new Padding(5);
-            labelSetAutoUpdateTime.Size = new Size(420, 46);
+            labelSetAutoUpdateTime.Size = new Size(420, 49);
             labelSetAutoUpdateTime.TabIndex = 0;
             labelSetAutoUpdateTime.Text = "自动更新数据时间 (30s-600s)";
             labelSetAutoUpdateTime.TextAlign = ContentAlignment.MiddleCenter;
@@ -362,7 +376,7 @@
             panelTimeSetting.Dock = DockStyle.Fill;
             panelTimeSetting.Location = new Point(439, 13);
             panelTimeSetting.Name = "panelTimeSetting";
-            panelTimeSetting.Size = new Size(420, 40);
+            panelTimeSetting.Size = new Size(420, 43);
             panelTimeSetting.TabIndex = 1;
             // 
             // tableLayoutPanelTimeSetting
@@ -378,7 +392,7 @@
             tableLayoutPanelTimeSetting.Name = "tableLayoutPanelTimeSetting";
             tableLayoutPanelTimeSetting.RowCount = 1;
             tableLayoutPanelTimeSetting.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
-            tableLayoutPanelTimeSetting.Size = new Size(420, 40);
+            tableLayoutPanelTimeSetting.Size = new Size(420, 43);
             tableLayoutPanelTimeSetting.TabIndex = 0;
             // 
             // numericUpDownAutoUpdateTime
@@ -396,13 +410,63 @@
             // 
             // btnAutoUpdateControl
             // 
+            btnAutoUpdateControl.AutoSize = true;
             btnAutoUpdateControl.Font = new Font("Microsoft YaHei UI", 10F);
             btnAutoUpdateControl.Location = new Point(337, 3);
             btnAutoUpdateControl.Name = "btnAutoUpdateControl";
-            btnAutoUpdateControl.Size = new Size(80, 34);
+            btnAutoUpdateControl.Size = new Size(80, 37);
             btnAutoUpdateControl.TabIndex = 1;
             btnAutoUpdateControl.Text = "开";
             btnAutoUpdateControl.UseVisualStyleBackColor = true;
+            // 
+            // labelGlobalFont
+            // 
+            labelGlobalFont.AutoSize = true;
+            labelGlobalFont.Dock = DockStyle.Fill;
+            labelGlobalFont.Font = new Font("Microsoft YaHei UI", 12F);
+            labelGlobalFont.Location = new Point(13, 59);
+            labelGlobalFont.Name = "labelGlobalFont";
+            labelGlobalFont.Size = new Size(420, 49);
+            labelGlobalFont.TabIndex = 2;
+            labelGlobalFont.Text = "软件字体";
+            labelGlobalFont.TextAlign = ContentAlignment.MiddleCenter;
+            // 
+            // tableLayoutPanelSoftwareFontSetting
+            // 
+            tableLayoutPanelSoftwareFontSetting.AutoSize = true;
+            tableLayoutPanelSoftwareFontSetting.ColumnCount = 2;
+            tableLayoutPanelSoftwareFontSetting.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+            tableLayoutPanelSoftwareFontSetting.ColumnStyles.Add(new ColumnStyle());
+            tableLayoutPanelSoftwareFontSetting.Controls.Add(comboBoxGlobalFont, 0, 0);
+            tableLayoutPanelSoftwareFontSetting.Controls.Add(btnGlobalFontRestoreDefault, 1, 0);
+            tableLayoutPanelSoftwareFontSetting.Dock = DockStyle.Fill;
+            tableLayoutPanelSoftwareFontSetting.Location = new Point(439, 62);
+            tableLayoutPanelSoftwareFontSetting.Name = "tableLayoutPanelSoftwareFontSetting";
+            tableLayoutPanelSoftwareFontSetting.RowCount = 1;
+            tableLayoutPanelSoftwareFontSetting.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
+            tableLayoutPanelSoftwareFontSetting.Size = new Size(420, 43);
+            tableLayoutPanelSoftwareFontSetting.TabIndex = 3;
+            // 
+            // comboBoxGlobalFont
+            // 
+            comboBoxGlobalFont.Dock = DockStyle.Fill;
+            comboBoxGlobalFont.Font = new Font("Microsoft YaHei UI", 10F);
+            comboBoxGlobalFont.FormattingEnabled = true;
+            comboBoxGlobalFont.Location = new Point(3, 3);
+            comboBoxGlobalFont.Name = "comboBoxGlobalFont";
+            comboBoxGlobalFont.Size = new Size(296, 35);
+            comboBoxGlobalFont.TabIndex = 0;
+            // 
+            // btnGlobalFontRestoreDefault
+            // 
+            btnGlobalFontRestoreDefault.AutoSize = true;
+            btnGlobalFontRestoreDefault.Font = new Font("Microsoft YaHei UI", 10F);
+            btnGlobalFontRestoreDefault.Location = new Point(305, 3);
+            btnGlobalFontRestoreDefault.Name = "btnGlobalFontRestoreDefault";
+            btnGlobalFontRestoreDefault.Size = new Size(112, 37);
+            btnGlobalFontRestoreDefault.TabIndex = 1;
+            btnGlobalFontRestoreDefault.Text = "恢复默认";
+            btnGlobalFontRestoreDefault.UseVisualStyleBackColor = true;
             // 
             // SettingsControl
             // 
@@ -427,12 +491,16 @@
             tableLayoutPanelChooseTerminalColor.ResumeLayout(false);
             tableLayoutPanelChooseTerminalColor.PerformLayout();
             groupBoxGlobal.ResumeLayout(false);
+            groupBoxGlobal.PerformLayout();
             tableLayoutPanelGlobalSetting.ResumeLayout(false);
             tableLayoutPanelGlobalSetting.PerformLayout();
             panelTimeSetting.ResumeLayout(false);
             panelTimeSetting.PerformLayout();
             tableLayoutPanelTimeSetting.ResumeLayout(false);
+            tableLayoutPanelTimeSetting.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)numericUpDownAutoUpdateTime).EndInit();
+            tableLayoutPanelSoftwareFontSetting.ResumeLayout(false);
+            tableLayoutPanelSoftwareFontSetting.PerformLayout();
             ResumeLayout(false);
             PerformLayout();
         }
@@ -466,5 +534,9 @@
         private Panel panelShowTerminalBackgroundColor;
         private Button btnRestoreDefault;
         private Panel panelRestoreDefault;
+        private Label labelGlobalFont;
+        private TableLayoutPanel tableLayoutPanelSoftwareFontSetting;
+        private ComboBox comboBoxGlobalFont;
+        private Button btnGlobalFontRestoreDefault;
     }
 }
