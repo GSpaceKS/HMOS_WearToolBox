@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("HMOS_WearToolBox")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0-beta2")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0-rc1")]
 [assembly: System.Reflection.AssemblyProductAttribute("HMOS_WearToolBox")]
 [assembly: System.Reflection.AssemblyTitleAttribute("HMOS_WearToolBox")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

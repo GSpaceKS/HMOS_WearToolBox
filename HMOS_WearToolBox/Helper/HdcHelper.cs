@@ -29,11 +29,11 @@ namespace HMOS_WearToolBox.Helper
 
             // 释放 hdc.exe
             if (!File.Exists(exePath))
-                ExtractResource("HMOS_WearToolBox.Resources.HDC.hdc.exe", exePath);
+                ExtractResource("HMOS_WearToolBox.Resources.hdc.exe", exePath);
 
             // 释放 libusb_shared.dll
             if (!File.Exists(dllPath))
-                ExtractResource("HMOS_WearToolBox.Resources.HDC.libusb_shared.dll", dllPath);
+                ExtractResource("HMOS_WearToolBox.Resources.libusb_shared.dll", dllPath);
 
             hdcPath = exePath;
             libPath = dllPath;

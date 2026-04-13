@@ -20,14 +20,5 @@
     <Setting Name="TerminalBackColor" Type="System.Drawing.Color" Scope="User">
       <Value Profile="(Default)">Black</Value>
     </Setting>
-    <Setting Name="GlobalFontName" Type="System.String" Scope="User">
-      <Value Profile="(Default)">HarmonyOS Sans SC Medium</Value>
-    </Setting>
-    <Setting Name="GlobalFontSize" Type="System.Single" Scope="User">
-      <Value Profile="(Default)">9</Value>
-    </Setting>
-    <Setting Name="UserPresets" Type="System.String" Scope="User">
-      <Value Profile="(Default)" />
-    </Setting>
   </Settings>
 </SettingsFile>

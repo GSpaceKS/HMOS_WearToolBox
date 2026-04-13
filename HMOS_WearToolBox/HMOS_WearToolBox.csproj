@@ -6,26 +6,13 @@
     <Nullable>enable</Nullable>
     <UseWindowsForms>true</UseWindowsForms>
     <ImplicitUsings>enable</ImplicitUsings>
-    <Version>1.0.0-beta2</Version>
+    <Version>1.0.0-rc1</Version>
     <ApplicationIcon>Resources\Icon\ICON_256.ico</ApplicationIcon>
 	<IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
-	<AllowUnsafeBlocks>True</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <ItemGroup>
     <None Remove="Resources\app_names.json" />
-    <None Remove="Resources\Fonts\CascadiaCode\CascadiaCode.ttf" />
-    <None Remove="Resources\Fonts\CascadiaMono\CascadiaMono.ttf" />
-    <None Remove="Resources\Fonts\Consolas\consola.ttf" />
-    <None Remove="Resources\Fonts\Consolas\consolab.ttf" />
-    <None Remove="Resources\Fonts\Consolas\consolai.ttf" />
-    <None Remove="Resources\Fonts\Consolas\consolaz.ttf" />
-    <None Remove="Resources\Fonts\HarmonyOS_Sans_SC\HarmonyOS_Sans_SC_Black.ttf" />
-    <None Remove="Resources\Fonts\HarmonyOS_Sans_SC\HarmonyOS_Sans_SC_Bold.ttf" />
-    <None Remove="Resources\Fonts\HarmonyOS_Sans_SC\HarmonyOS_Sans_SC_Medium.ttf" />
-    <None Remove="Resources\Fonts\Microsoft_YaHei_UI\msyh.ttc" />
-    <None Remove="Resources\Fonts\Microsoft_YaHei_UI\msyhbd.ttc" />
-    <None Remove="Resources\Fonts\Microsoft_YaHei_UI\msyhl.ttc" />
     <None Remove="Resources\hdc.exe" />
     <None Remove="Resources\libusb_shared.dll" />
   </ItemGroup>
@@ -36,20 +23,8 @@
 
   <ItemGroup>
     <EmbeddedResource Include="Resources\app_names.json" />
-    <EmbeddedResource Include="Resources\Fonts\CascadiaCode\CascadiaCode.ttf" />
-    <EmbeddedResource Include="Resources\Fonts\CascadiaMono\CascadiaMono.ttf" />
-    <EmbeddedResource Include="Resources\Fonts\Consolas\consola.ttf" />
-    <EmbeddedResource Include="Resources\Fonts\Consolas\consolab.ttf" />
-    <EmbeddedResource Include="Resources\Fonts\Consolas\consolai.ttf" />
-    <EmbeddedResource Include="Resources\Fonts\Consolas\consolaz.ttf" />
-    <EmbeddedResource Include="Resources\Fonts\HarmonyOS_Sans_SC\HarmonyOS_Sans_SC_Black.ttf" />
-    <EmbeddedResource Include="Resources\Fonts\HarmonyOS_Sans_SC\HarmonyOS_Sans_SC_Bold.ttf" />
-    <EmbeddedResource Include="Resources\Fonts\HarmonyOS_Sans_SC\HarmonyOS_Sans_SC_Medium.ttf" />
-    <EmbeddedResource Include="Resources\Fonts\Microsoft_YaHei_UI\msyh.ttc" />
-    <EmbeddedResource Include="Resources\Fonts\Microsoft_YaHei_UI\msyhbd.ttc" />
-    <EmbeddedResource Include="Resources\Fonts\Microsoft_YaHei_UI\msyhl.ttc" />
-    <EmbeddedResource Include="Resources\HDC\hdc.exe" />
-    <EmbeddedResource Include="Resources\HDC\libusb_shared.dll" />
+    <EmbeddedResource Include="Resources\hdc.exe" />
+    <EmbeddedResource Include="Resources\libusb_shared.dll" />
   </ItemGroup>
 
   <ItemGroup>

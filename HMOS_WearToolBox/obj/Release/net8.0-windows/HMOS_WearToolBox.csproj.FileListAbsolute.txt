@@ -22,4 +22,3 @@ D:\Visual Studio Program\HMOS_WearToolBox\HMOS_WearToolBox\obj\Release\net8.0-wi
 D:\Visual Studio Program\HMOS_WearToolBox\HMOS_WearToolBox\obj\Release\net8.0-windows\HMOS_WearToolBox.pdb
 D:\Visual Studio Program\HMOS_WearToolBox\HMOS_WearToolBox\obj\Release\net8.0-windows\HMOS_WearToolBox.genruntimeconfig.cache
 D:\Visual Studio Program\HMOS_WearToolBox\HMOS_WearToolBox\obj\Release\net8.0-windows\ref\HMOS_WearToolBox.dll
-D:\Visual Studio Program\HMOS_WearToolBox\HMOS_WearToolBox\bin\Release\net8.0-windows\HMOS_WearToolBox.dll.config

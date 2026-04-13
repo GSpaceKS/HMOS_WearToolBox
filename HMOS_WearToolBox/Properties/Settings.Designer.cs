@@ -94,41 +94,5 @@ namespace HMOS_WearToolBox.Properties {
                 this["TerminalBackColor"] = value;
             }
         }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("HarmonyOS Sans SC Medium")]
-        public string GlobalFontName {
-            get {
-                return ((string)(this["GlobalFontName"]));
-            }
-            set {
-                this["GlobalFontName"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("9")]
-        public float GlobalFontSize {
-            get {
-                return ((float)(this["GlobalFontSize"]));
-            }
-            set {
-                this["GlobalFontSize"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string UserPresets {
-            get {
-                return ((string)(this["UserPresets"]));
-            }
-            set {
-                this["UserPresets"] = value;
-            }
-        }
     }
 }

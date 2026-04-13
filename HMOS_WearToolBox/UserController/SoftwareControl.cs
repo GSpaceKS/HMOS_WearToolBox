@@ -410,13 +410,9 @@ namespace HMOS_WearToolBox.UserController
         /// <summary>
         /// 异步刷新应用列表，从设备获取所有已安装应用并显示。
         /// </summary>
-        private DateTime _lastRefreshTime = DateTime.MinValue;
         private async Task RefreshAppListAsync()
         {
             if (isRefreshing) return;
-            if ((DateTime.Now - _lastRefreshTime).TotalSeconds < 3)
-                return;
-            _lastRefreshTime = DateTime.Now;
             isRefreshing = true;
 
             if (!await IsDeviceConnectedAsync())
