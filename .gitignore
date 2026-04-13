@@ -1,1 +1,124 @@
-*.vsidx
+## 忽略 Visual Studio 临时文件、生成结果以及由流行插件生成的文件
+## 此模板源自官方 GitHub 仓库：https://github.com/github/gitignore/blob/main/VisualStudio.gitignore
+
+# 用户特定文件
+*.rsuser
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# 构建结果
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+x64/
+x86/
+[Ww]in32/
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Bb]uild/
+
+# 全局默认的构建输出目录
+!**/wwwroot/**/bin
+
+# 特定于 Visual Studio 的缓存文件
+.vs/
+*.vsp
+*.vspx
+*.sap
+*.binlog
+
+# .NET 专用文件
+project.lock.json
+project.fragment.lock.json
+*.nuget.props
+*.nuget.targets
+
+# NuGet 包
+*.nupkg
+*.snupkg
+*.dotnupkg
+packages/
+!**/packages/build/
+.nuget/
+
+# 测试结果
+[Rr]elease_*_Test*/
+[Bb]enchmarkDotNet.Artifacts/
+*.TestResults.xml
+*.coverage
+*.coveragexml
+*.trx
+*.junit.xml
+TestResult.xml
+
+# 代码覆盖率
+*.coverage
+*.coveragexml
+
+# 其他可能生成的杂项文件
+*.dbmdl
+*.dbproj.schemaview
+*.jfm
+*.pidb
+*.pdb
+*.iobj
+*.ipdb
+*.pgc
+*.pgd
+*.rptproj.bak
+*.tlog
+*.sbr
+*.vbwin
+*.vsp
+*.vspx
+*.vspscc
+*.vssscc
+*.tmp
+*.tmp_proj
+*.log
+*.tlb
+*.tlh
+*.tmp
+*.tmp_proj
+*_wpftmp.csproj
+*.lix
+*.sqlite
+*.cache
+*.gencache
+*.vsix
+*.vsixmanifest
+_ReSharper.*
+*.resharper
+[Tt]emp/
+*.sor
+*.sor.*
+*.db
+*.mdmp
+*.iTrace
+*.vstest
+
+# Windows 系统文件
+Thumbs.db
+*.dll
+*.exe
+*.dotnet
+*.lnk
+*.tmp
+*.bak
+*.swp
+*.swo
+~$*
+*~
+$*
+
+# macOS 系统文件
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
