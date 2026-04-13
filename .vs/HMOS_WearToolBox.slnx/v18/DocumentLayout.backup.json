@@ -1,20 +1,7 @@
 {
   "Version": 1,
   "WorkspaceRootPath": "D:\\Visual Studio Program\\HMOS_WearToolBox\\",
-  "Documents": [
-    {
-      "AbsoluteMoniker": "D:0:0:{98D554CB-060F-F83A-7E0C-C9DFE7C93657}|HMOS_WearToolBox\\HMOS_WearToolBox.csproj|d:\\visual studio program\\hmos_weartoolbox\\hmos_weartoolbox\\usercontroller\\settingscontrol.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{98D554CB-060F-F83A-7E0C-C9DFE7C93657}|HMOS_WearToolBox\\HMOS_WearToolBox.csproj|solutionrelative:hmos_weartoolbox\\usercontroller\\settingscontrol.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{98D554CB-060F-F83A-7E0C-C9DFE7C93657}|HMOS_WearToolBox\\HMOS_WearToolBox.csproj|d:\\visual studio program\\hmos_weartoolbox\\hmos_weartoolbox\\usercontroller\\settingscontrol.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
-      "RelativeMoniker": "D:0:0:{98D554CB-060F-F83A-7E0C-C9DFE7C93657}|HMOS_WearToolBox\\HMOS_WearToolBox.csproj|solutionrelative:hmos_weartoolbox\\usercontroller\\settingscontrol.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{98D554CB-060F-F83A-7E0C-C9DFE7C93657}|HMOS_WearToolBox\\HMOS_WearToolBox.csproj|d:\\visual studio program\\hmos_weartoolbox\\hmos_weartoolbox\\usercontroller\\settingscontrol.designer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{98D554CB-060F-F83A-7E0C-C9DFE7C93657}|HMOS_WearToolBox\\HMOS_WearToolBox.csproj|solutionrelative:hmos_weartoolbox\\usercontroller\\settingscontrol.designer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    }
-  ],
+  "Documents": [],
   "DocumentGroupContainers": [
     {
       "Orientation": 0,
@@ -22,49 +9,11 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 3,
+          "SelectedChildIndex": -1,
           "Children": [
             {
               "$type": "Bookmark",
               "Name": "ST:0:0:{b1e99781-ab81-11d0-b683-00aa00a3ee26}"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "SettingsControl.Designer.cs",
-              "DocumentMoniker": "D:\\Visual Studio Program\\HMOS_WearToolBox\\HMOS_WearToolBox\\UserController\\SettingsControl.Designer.cs",
-              "RelativeDocumentMoniker": "HMOS_WearToolBox\\UserController\\SettingsControl.Designer.cs",
-              "ToolTip": "D:\\Visual Studio Program\\HMOS_WearToolBox\\HMOS_WearToolBox\\UserController\\SettingsControl.Designer.cs*",
-              "RelativeToolTip": "HMOS_WearToolBox\\UserController\\SettingsControl.Designer.cs*",
-              "ViewState": "AgIAABUAAAAAAAAAAAAUwMUBAAAgAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-03-27T16:48:14.793Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "SettingsControl.cs [\u8BBE\u8BA1]",
-              "DocumentMoniker": "D:\\Visual Studio Program\\HMOS_WearToolBox\\HMOS_WearToolBox\\UserController\\SettingsControl.cs",
-              "RelativeDocumentMoniker": "HMOS_WearToolBox\\UserController\\SettingsControl.cs",
-              "ToolTip": "D:\\Visual Studio Program\\HMOS_WearToolBox\\HMOS_WearToolBox\\UserController\\SettingsControl.cs [\u8BBE\u8BA1]*",
-              "RelativeToolTip": "HMOS_WearToolBox\\UserController\\SettingsControl.cs [\u8BBE\u8BA1]*",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-03-27T16:42:22.587Z",
-              "EditorCaption": " [\u8BBE\u8BA1]"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 0,
-              "Title": "SettingsControl.cs",
-              "DocumentMoniker": "D:\\Visual Studio Program\\HMOS_WearToolBox\\HMOS_WearToolBox\\UserController\\SettingsControl.cs",
-              "RelativeDocumentMoniker": "HMOS_WearToolBox\\UserController\\SettingsControl.cs",
-              "ToolTip": "D:\\Visual Studio Program\\HMOS_WearToolBox\\HMOS_WearToolBox\\UserController\\SettingsControl.cs*",
-              "RelativeToolTip": "HMOS_WearToolBox\\UserController\\SettingsControl.cs*",
-              "ViewState": "AgIAAJgAAAAAAAAAAAAUwKUAAAATAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-03-27T16:42:19.165Z",
-              "EditorCaption": ""
             }
           ]
         }
