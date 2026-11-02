@@ -122,3 +122,13 @@ $*
 .Spotlight-V100
 .Trashes
 ehthumbs.db
+
+# ── 例外：上面 "*./dll"、"*.exe" 会误伤项目自带的 HDC 工具链二进制 ──
+# 这两个文件是 csproj 里的 EmbeddedResource，缺失会导致编译报 CS1566。
+# 例外规则必须写在忽略规则之后，gitignore 以最后一条匹配的规则为准。
+!HMOS_WearToolBox/Resources/HDC/hdc.exe
+!HMOS_WearToolBox/Resources/HDC/libusb_shared.dll
+
+# ── 发布输出目录（若把 PublishDir 指到仓库内，避免把产物提交上去） ──
+[Pp]ublish/
+

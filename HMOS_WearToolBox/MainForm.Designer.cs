@@ -19,6 +19,7 @@
             navflowLayoutPanel = new FlowLayoutPanel();
             btnHome = new Button();
             btnSoftware = new Button();
+            btnSnapshot = new Button();
             btnTerminal = new Button();
             btnSettings = new Button();
             btnAbout = new Button();
@@ -31,6 +32,7 @@
             navflowLayoutPanel.AutoSize = true;
             navflowLayoutPanel.Controls.Add(btnHome);
             navflowLayoutPanel.Controls.Add(btnSoftware);
+            navflowLayoutPanel.Controls.Add(btnSnapshot);
             navflowLayoutPanel.Controls.Add(btnTerminal);
             navflowLayoutPanel.Controls.Add(btnSettings);
             navflowLayoutPanel.Controls.Add(btnAbout);
@@ -61,6 +63,17 @@
             btnSoftware.TabIndex = 1;
             btnSoftware.Text = "软件管理";
             btnSoftware.UseVisualStyleBackColor = true;
+            // 
+            // btnSnapshot
+            // 
+            btnSnapshot.AutoSize = true;
+            btnSnapshot.Font = new Font("Microsoft YaHei UI", 9F);
+            btnSnapshot.Location = new Point(195, 3);
+            btnSnapshot.Name = "btnSnapshot";
+            btnSnapshot.Size = new Size(100, 34);
+            btnSnapshot.TabIndex = 2;
+            btnSnapshot.Text = "应用快照";
+            btnSnapshot.UseVisualStyleBackColor = true;
             // 
             // btnTerminal
             // 
@@ -111,10 +124,9 @@
             Controls.Add(contentPanel);
             Controls.Add(navflowLayoutPanel);
             Icon = (Icon)resources.GetObject("$this.Icon");
-            MinimumSize = new Size(900, 1100);
+            MinimumSize = new Size(760, 560);
             Name = "MainForm";
             Text = "鸿蒙手表工具箱";
-            Load += MainForm_Load;
             navflowLayoutPanel.ResumeLayout(false);
             navflowLayoutPanel.PerformLayout();
             ResumeLayout(false);
@@ -124,6 +136,7 @@
         private FlowLayoutPanel navflowLayoutPanel;
         private Button btnHome;
         private Button btnSoftware;
+        private Button btnSnapshot;
         private Button btnTerminal;
         private Button btnSettings;
         private Button btnAbout;

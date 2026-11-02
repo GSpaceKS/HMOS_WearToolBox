@@ -2,7 +2,6 @@
 using System;
 using System.Drawing;
 using System.Drawing.Drawing2D;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -18,13 +17,9 @@ namespace HMOS_WearToolBox.UserController
     /// </summary>
     public partial class HomeControl : UserControl
     {
-        /// <summary>自动刷新定时器。</summary>
         private WinFormsTimer refreshTimer;
-        /// <summary>当前电池电量百分比。</summary>
         private int batteryPercent = 0;
-        /// <summary>当前存储使用百分比。</summary>
         private int storagePercent = 0;
-        /// <summary>是否正在刷新数据，防止重复刷新。</summary>
         private bool isRefreshing = false;
 
         /// <summary>
@@ -33,6 +28,12 @@ namespace HMOS_WearToolBox.UserController
         public HomeControl()
         {
             InitializeComponent();
+
+            // 下拉框比按钮矮，FlowLayoutPanel 默认按上边距对齐，看上去会「高一截」。
+            // 这里按高度差补一段上边距，让下拉框和四个按钮垂直居中对齐（不同 DPI 下自动算）。
+            int comboOffset = Math.Max(0, (btnReconnect.Height - cmbDevices.Height) / 2);
+            Padding comboMargin = cmbDevices.Margin;
+            cmbDevices.Margin = new Padding(comboMargin.Left, comboMargin.Top + comboOffset, comboMargin.Right, comboMargin.Bottom);
 
             // 绑定按钮和下拉框事件
             btnReconnect.Click += BtnReconnect_Click;
@@ -102,9 +103,6 @@ namespace HMOS_WearToolBox.UserController
             btnReconnect.Enabled = cmbDevices.SelectedItem != null;
         }
 
-        /// <summary>
-        /// 当选中的设备改变时，更新界面 UI。
-        /// </summary>
         private void OnSelectedDeviceChanged()
         {
             UpdateUIForCurrentDevice();
@@ -151,9 +149,6 @@ namespace HMOS_WearToolBox.UserController
             }
         }
 
-        /// <summary>
-        /// 从设备管理器中加载设备列表到下拉框，并刷新界面。
-        /// </summary>
         private void LoadDevices()
         {
             cmbDevices.Items.Clear();
@@ -182,10 +177,12 @@ namespace HMOS_WearToolBox.UserController
         /// <summary>
         /// 添加设备按钮点击事件：弹出输入框输入 IP 地址，尝试连接，若成功则保存设备。
         /// </summary>
-        private void BtnAddDevice_Click(object sender, EventArgs e)
+        private async void BtnAddDevice_Click(object sender, EventArgs e)
         {
             string ip = Microsoft.VisualBasic.Interaction.InputBox("请输入设备 IP 地址 (例如 192.168.1.100:5555)", "添加设备", "192.168.");
             if (string.IsNullOrWhiteSpace(ip)) return;
+
+            ip = ip.Trim();
 
             // 检查是否已存在
             var existing = DeviceManager.GetDevices().FirstOrDefault(d => d.IpAddress == ip);
@@ -195,33 +192,51 @@ namespace HMOS_WearToolBox.UserController
                 return;
             }
 
-            string result = HdcHelper.RunHdcCommand($"tconn {ip}");
-            Thread.Sleep(500);
-            string targets = HdcHelper.RunHdcCommand("list targets");
-            if (targets.Contains(ip.Split(':')[0]))
+            // 原来这里在 UI 线程上 Thread.Sleep(500) 再跑两次阻塞式 hdc，界面会完全卡住
+            this.Cursor = Cursors.WaitCursor;
+            btnAddDevice.Enabled = false;
+
+            try
             {
-                var device = new DeviceInfo
+                string result = await Task.Run(() => HdcHelper.RunHdcCommand($"tconn {ip}"));
+                await Task.Delay(500);
+                List<string> targets = await Task.Run(() => HdcHelper.ListTargets());
+
+                if (HdcHelper.IsTargetOnline(targets, ip))
                 {
-                    Name = "新设备",
-                    IpAddress = ip,
-                    LastConnected = DateTime.Now,
-                    IsConnected = true,
-                    IsNew = true
-                };
-                DeviceManager.AddDevice(device);
-                LoadDevices();
-                ShowAuthorizationDialog(device);
+                    var device = new DeviceInfo
+                    {
+                        Name = "新设备",
+                        IpAddress = ip,
+                        LastConnected = DateTime.Now,
+                        IsConnected = true,
+                        IsNew = true
+                    };
+                    DeviceManager.AddDevice(device);
+                    DeviceConnectionHelper.InvalidateCache();
+                    LoadDevices();
+                    ShowAuthorizationDialog(device);
+                }
+                else
+                {
+                    MessageBox.Show($"连接失败：{result}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
             }
-            else
+            catch (Exception ex)
             {
-                MessageBox.Show($"连接失败：{result}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"连接失败：{ex.Message}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            finally
+            {
+                this.Cursor = Cursors.Default;
+                btnAddDevice.Enabled = true;
             }
         }
 
         /// <summary>
         /// 删除设备按钮点击事件：从管理器中删除当前选中的设备，并断开连接。
         /// </summary>
-        private void BtnDeleteDevice_Click(object sender, EventArgs e)
+        private async void BtnDeleteDevice_Click(object sender, EventArgs e)
         {
             if (cmbDevices.SelectedItem == null) return;
             int index = cmbDevices.SelectedIndex;
@@ -233,13 +248,15 @@ namespace HMOS_WearToolBox.UserController
             // 如果设备正在连接，先断开（避免残留连接）
             if (device.IsConnected)
             {
-                HdcHelper.RunHdcCommand($"tconn {device.IpAddress} -remove");
+                // 断开是「尽力而为」：失败也要继续删除，否则用户就删不掉了
+                await RunHdcQuietly($"tconn {device.IpAddress} -remove");
             }
 
             // 从管理器中删除
             DeviceManager.RemoveDevice(device.Id);
 
             // 同步剩余设备的连接状态（确保 DeviceManager 中的 IsConnected 正确）
+            DeviceConnectionHelper.InvalidateCache();
             DeviceConnectionHelper.CheckAndUpdateConnectionStatus();
 
             // 重新加载设备列表（内部会触发 UI 更新）
@@ -329,8 +346,8 @@ namespace HMOS_WearToolBox.UserController
                     if (cts.Token.IsCancellationRequested) return false;
                     if (!result.Contains("Connect OK")) return false;
 
-                    string targets = HdcHelper.RunHdcCommand("list targets");
-                    if (!targets.Contains(device.IpAddress.Split(':')[0])) return false;
+                    List<string> targets = HdcHelper.ListTargets();
+                    if (!HdcHelper.IsTargetOnline(targets, device.IpAddress)) return false;
 
                     device.IsConnected = true;
                     device.LastConnected = DateTime.Now;
@@ -370,45 +387,52 @@ namespace HMOS_WearToolBox.UserController
             }
         }
 
-        /// <summary>
-        /// 断开连接按钮点击事件：断开当前选中设备的连接。
-        /// </summary>
-        private void BtnDisconnect_Click(object sender, EventArgs e)
+        private async void BtnDisconnect_Click(object sender, EventArgs e)
         {
             if (cmbDevices.SelectedItem == null) return;
             int index = cmbDevices.SelectedIndex;
             var device = DeviceManager.GetDevices()[index];
 
-            HdcHelper.RunHdcCommand($"tconn {device.IpAddress} -remove");
-            Thread.Sleep(500);
-
-            string targets = HdcHelper.RunHdcCommand("list targets");
-            bool stillConnected = targets.Contains(device.IpAddress.Split(':')[0]);
-
-            device.IsConnected = false;
-            DeviceManager.UpdateDevice(device);
-
-            cmbDevices.SelectedIndex = -1;
-            cmbDevices.Text = string.Empty;
-            UpdateReconnectButtonState();
-            UpdateUIForCurrentDevice();
-
-            if (stillConnected)
+            this.Cursor = Cursors.WaitCursor;
+            try
             {
-                MessageBox.Show("设备未能完全断开，请检查网络或重启软件。", "警告", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                await RunHdcQuietly($"tconn {device.IpAddress} -remove");
+                await Task.Delay(500);
+
+                List<string> targets = await Task.Run(() => HdcHelper.ListTargets());
+                bool stillConnected = HdcHelper.IsTargetOnline(targets, device.IpAddress);
+
+                device.IsConnected = false;
+                DeviceManager.UpdateDevice(device);
+                DeviceConnectionHelper.InvalidateCache();
+
+                cmbDevices.SelectedIndex = -1;
+                cmbDevices.Text = string.Empty;
+                UpdateReconnectButtonState();
+                UpdateUIForCurrentDevice();
+
+                if (stillConnected)
+                {
+                    MessageBox.Show("设备未能完全断开，请检查网络或重启软件。", "警告", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }
+                else
+                {
+                    MessageBox.Show("已断开", "提示");
+                }
             }
-            else
+            catch (Exception ex)
             {
-                MessageBox.Show("已断开", "提示");
+                MessageBox.Show($"断开失败：{ex.Message}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            finally
+            {
+                this.Cursor = Cursors.Default;
             }
 
             var mainForm = this.ParentForm as MainForm;
             mainForm?.ClearSoftwareList();
         }
 
-        /// <summary>
-        /// 设备下拉框鼠标点击事件：右键点击时弹出删除确认。
-        /// </summary>
         private void CmbDevices_MouseClick(object sender, MouseEventArgs e)
         {
             if (e.Button == MouseButtons.Right && cmbDevices.SelectedItem != null)
@@ -423,9 +447,6 @@ namespace HMOS_WearToolBox.UserController
             }
         }
 
-        /// <summary>
-        /// 刷新按钮点击事件：手动刷新设备信息。
-        /// </summary>
         private async void BtnRefresh_Click(object sender, EventArgs e)
         {
             if (cmbDevices.SelectedItem == null) return;
@@ -441,9 +462,6 @@ namespace HMOS_WearToolBox.UserController
             }
         }
 
-        /// <summary>
-        /// 显示设备授权对话框，提示用户在手表端确认授权。
-        /// </summary>
         private void ShowAuthorizationDialog(DeviceInfo device)
         {
             Form authForm = new Form
@@ -543,18 +561,51 @@ namespace HMOS_WearToolBox.UserController
                 MessageBox.Show("已获取信息", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
             };
 
-            btnCancel.Click += (s, e) =>
+            btnCancel.Click += async (s, e) =>
             {
                 authForm.Close();
-                HdcHelper.RunHdcCommand($"tconn {device.IpAddress} -remove");
+                await RunHdcQuietly($"tconn {device.IpAddress} -remove");
                 device.IsConnected = false;
                 DeviceManager.UpdateDevice(device);
+                DeviceConnectionHelper.InvalidateCache();
                 ResetUI();
                 UpdateUIForCurrentDevice();
                 MessageBox.Show("用户已取消连接！", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
             };
 
             authForm.ShowDialog(this);
+        }
+
+        /// <summary>
+        /// 把更新 UI 的委托安全地派发到 UI 线程；控件已销毁时直接忽略，
+        /// 避免刷新途中关窗时抛 ObjectDisposedException。
+        /// </summary>
+        private void RunOnUi(Action action)
+        {
+            if (IsDisposed || !IsHandleCreated)
+                return;
+
+            if (InvokeRequired)
+                BeginInvoke(action);
+            else
+                action();
+        }
+
+        /// <summary>
+        /// 执行一条 hdc 命令，失败只记录不抛出。
+        /// 用于「断开连接」这类尽力而为的操作 —— 失败也不该阻断后面的界面流程。
+        /// </summary>
+        private static async Task<string> RunHdcQuietly(string arguments, int timeoutMs = HdcHelper.QuickTimeoutMs)
+        {
+            try
+            {
+                return await Task.Run(() => HdcHelper.RunHdcCommand(arguments, timeoutMs));
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"hdc {arguments} 失败: {ex.Message}");
+                return string.Empty;
+            }
         }
 
         /// <summary>
@@ -574,11 +625,24 @@ namespace HMOS_WearToolBox.UserController
             }
 
             // 检查设备是否仍在列表中
-            string targets = await Task.Run(() => HdcHelper.RunHdcCommand("list targets"));
-            if (!targets.Contains(device.IpAddress.Split(':')[0]))
+            bool stillOnline;
+            try
+            {
+                List<string> targets = await Task.Run(() => HdcHelper.ListTargets(HdcHelper.QuickTimeoutMs));
+                stillOnline = HdcHelper.IsTargetOnline(targets, device.IpAddress);
+            }
+            catch (Exception ex)
+            {
+                // 这个方法由 async void 事件处理器调用，异常逃出去会直接崩掉进程
+                MessageBox.Show($"无法与 hdc 通信：{ex.Message}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            if (!stillOnline)
             {
                 device.IsConnected = false;
                 DeviceManager.UpdateDevice(device);
+                DeviceConnectionHelper.InvalidateCache();
                 UpdateUIForCurrentDevice();
                 MessageBox.Show("设备已断开", "提示");
                 return;
@@ -610,7 +674,7 @@ namespace HMOS_WearToolBox.UserController
                     var batteryInfo = BatteryParser.Parse(batteryOutput);
                     var storageInfo = StorageParser.Parse(storageOutput);
 
-                    this.Invoke(new Action(() =>
+                    RunOnUi(() =>
                     {
                         lblDeviceNameValue.Text = name;
                         lblDeviceModelValue.Text = model;
@@ -621,7 +685,7 @@ namespace HMOS_WearToolBox.UserController
                         UpdateBatteryUI(batteryInfo);
                         UpdateStorageUI(storageInfo);
                         UpdateUIForCurrentDevice();
-                    }));
+                    });
 
                     // 如果获取到的设备名与已保存的不同，则更新设备名称
                     if (!string.IsNullOrWhiteSpace(name) && name != "未知" && name != device.Name)
@@ -644,14 +708,14 @@ namespace HMOS_WearToolBox.UserController
                     var batteryInfo = BatteryParser.Parse(batteryOutput);
                     var storageInfo = StorageParser.Parse(storageOutput);
 
-                    this.Invoke(new Action(() =>
+                    RunOnUi(() =>
                     {
                         lblSysVersionValue.Text = sysVersion;
                         lblApiVersionValue.Text = apiVersion;
                         UpdateBatteryUI(batteryInfo);
                         UpdateStorageUI(storageInfo);
                         UpdateUIForCurrentDevice();
-                    }));
+                    });
                 }
             }
             catch (Exception ex)
@@ -686,9 +750,6 @@ namespace HMOS_WearToolBox.UserController
             return match.Success ? match.Groups[1].Value : "未知";
         }
 
-        /// <summary>
-        /// 更新电池相关的 UI 显示。
-        /// </summary>
         private void UpdateBatteryUI(BatteryInfo info)
         {
             lblBatteryValue.Text = $"{info.Capacity}%";
@@ -699,9 +760,6 @@ namespace HMOS_WearToolBox.UserController
             pbBatteryRing.Invalidate();
         }
 
-        /// <summary>
-        /// 将充电状态代码转换为文本。
-        /// </summary>
         private string GetChargeStatusText(int status) => status switch
         {
             0 => "未充电",
@@ -710,9 +768,6 @@ namespace HMOS_WearToolBox.UserController
             _ => "未知"
         };
 
-        /// <summary>
-        /// 将电池健康状态代码转换为文本。
-        /// </summary>
         private string GetHealthStatusText(int health) => health switch
         {
             0 => "良好",
@@ -723,9 +778,6 @@ namespace HMOS_WearToolBox.UserController
             _ => "未知"
         };
 
-        /// <summary>
-        /// 更新存储相关的 UI 显示。
-        /// </summary>
         private void UpdateStorageUI(StorageInfo info)
         {
             double totalGB = info.Total / (1024.0 * 1024);
@@ -769,19 +821,10 @@ namespace HMOS_WearToolBox.UserController
             pbStorageRing.Invalidate();
         }
 
-        /// <summary>
-        /// 电池环形进度条的绘制事件。
-        /// </summary>
         private void PbBatteryRing_Paint(object sender, PaintEventArgs e) => DrawRing(e.Graphics, pbBatteryRing.Width, pbBatteryRing.Height, batteryPercent, Color.LimeGreen);
 
-        /// <summary>
-        /// 存储环形进度条的绘制事件。
-        /// </summary>
         private void PbStorageRing_Paint(object sender, PaintEventArgs e) => DrawRing(e.Graphics, pbStorageRing.Width, pbStorageRing.Height, storagePercent, Color.DodgerBlue);
 
-        /// <summary>
-        /// 绘制环形进度条。
-        /// </summary>
         private void DrawRing(Graphics g, int width, int height, int percent, Color progressColor)
         {
             g.SmoothingMode = SmoothingMode.AntiAlias;
@@ -829,9 +872,6 @@ namespace HMOS_WearToolBox.UserController
             }
         }
 
-        /// <summary>
-        /// 设置自动更新开关状态（控制定时器启停）。
-        /// </summary>
         public void SetAutoUpdateEnabled(bool enabled)
         {
             if (refreshTimer != null)

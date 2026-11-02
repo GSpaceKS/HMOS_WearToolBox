@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using HMOS_WearToolBox.Helper;
@@ -9,18 +8,12 @@ using HMOS_WearToolBox.Helper;
 namespace HMOS_WearToolBox.UserController
 {
     /// <summary>
-    /// 终端控件，模拟命令行交互，支持执行 hdc 命令、命令历史记录和命令记录保存。
+    /// 终端控件，模拟命令行交互，支持执行 hdc 命令、上下键命令历史、右键复制/粘贴。
     /// </summary>
     public partial class TerminalControl : UserControl
     {
-        // 是否启用命令记录功能
-        private bool _recordEnabled = false;
-        // 最大保存记录数
-        private int _maxRecords = 100;
-        // 存储命令执行记录
-        private List<CommandRecord> _records = new List<CommandRecord>();
-        // 定时检测设备连接状态的计时器
-        private System.Windows.Forms.Timer _connectionTimer;
+        // 定时检测设备连接状态的计时器（在 InitializeControl 中创建）
+        private System.Windows.Forms.Timer? _connectionTimer;
         // 当前设备是否已连接
         private bool _isConnected = false;
         // 命令历史列表（用于上下键切换）
@@ -35,9 +28,6 @@ namespace HMOS_WearToolBox.UserController
             ApplySettings(); // 应用用户保存的终端样式
         }
 
-        /// <summary>
-        /// 初始化控件外观和事件绑定。
-        /// </summary>
         private void InitializeControl()
         {
             if (richTextBoxTerminal == null) return;
@@ -55,17 +45,14 @@ namespace HMOS_WearToolBox.UserController
             richTextBoxTerminal.KeyDown += RichTextBox_KeyDown;
             richTextBoxTerminal.MouseDown += RichTextBox_MouseDown;
 
-            // 创建连接状态检测计时器，每 3 秒检测一次
+            // 创建连接状态检测计时器，每 3 秒检测一次（异步执行，不阻塞 UI 线程）
             _connectionTimer = new System.Windows.Forms.Timer { Interval = 3000 };
-            _connectionTimer.Tick += (s, e) => CheckConnectionAndUpdateUI();
+            _connectionTimer.Tick += async (s, e) => await RefreshConnectionStateAsync();
 
             // 显示初始提示符
             AppendPrompt();
         }
 
-        /// <summary>
-        /// 应用用户保存的终端样式（字体、颜色）
-        /// </summary>
         public void ApplySettings()
         {
             if (richTextBoxTerminal == null) return;
@@ -82,54 +69,41 @@ namespace HMOS_WearToolBox.UserController
             richTextBoxTerminal.BackColor = Properties.Settings.Default.TerminalBackColor;
         }
 
-        /// <summary>
-        /// 控件可见性改变时，控制连接检测计时器的启停。
-        /// </summary>
         protected override void OnVisibleChanged(EventArgs e)
         {
             base.OnVisibleChanged(e);
             if (Visible)
             {
-                _connectionTimer.Start();
-                CheckConnectionAndUpdateUI();
+                _connectionTimer?.Start();
+                _ = RefreshConnectionStateAsync();
             }
             else
             {
-                _connectionTimer.Stop();
+                _connectionTimer?.Stop();
             }
         }
 
         /// <summary>
-        /// 检测设备连接状态并更新 UI（如果状态发生变化）。
+        /// 重新检测设备连接状态并更新 UI（仅状态变化时才刷新界面）。
+        /// 走 DeviceConnectionHelper 的缓存，且在后台线程询问 hdc，不会卡住界面。
         /// </summary>
-        private void CheckConnectionAndUpdateUI()
+        private async Task RefreshConnectionStateAsync()
         {
-            bool connected = IsDeviceConnected();
-            if (_isConnected != connected)
-            {
-                _isConnected = connected;
-                UpdateUIForConnection(connected);
-            }
+            bool connected = await DeviceConnectionHelper.CheckAndUpdateConnectionStatusAsync();
+
+            if (_isConnected == connected)
+                return;
+
+            _isConnected = connected;
+            UpdateUIForConnection(connected);
         }
 
         /// <summary>
-        /// 判断当前是否有设备连接。
+        /// 当前是否有设备连接。
+        /// 这里只读缓存、不主动去问 hdc —— 这个方法在每次按键、每次右键里都会调用，
+        /// 真去启动一个 hdc 进程会让打字明显卡顿。缓存由上方 3 秒一次的定时器刷新。
         /// </summary>
-        private bool IsDeviceConnected()
-        {
-            try
-            {
-                string targets = HdcHelper.RunHdcCommand("list targets");
-                if (string.IsNullOrWhiteSpace(targets)) return false;
-                var lines = targets.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
-                // 包含 '.' 表示 IP 地址，或包含 "device" 表示已连接设备
-                return lines.Any(line => line.Contains('.') || line.Contains("device"));
-            }
-            catch
-            {
-                return false;
-            }
-        }
+        private bool IsDeviceConnected() => DeviceConnectionHelper.LastKnownOnline;
 
         /// <summary>
         /// 根据连接状态更新 UI：只读/可编辑，并显示提示信息。
@@ -165,9 +139,6 @@ namespace HMOS_WearToolBox.UserController
             }
         }
 
-        /// <summary>
-        /// 在终端末尾追加新的命令提示符 "> "。
-        /// </summary>
         private void AppendPrompt()
         {
             if (richTextBoxTerminal.InvokeRequired)
@@ -177,9 +148,6 @@ namespace HMOS_WearToolBox.UserController
             richTextBoxTerminal.ScrollToCaret();
         }
 
-        /// <summary>
-        /// 获取当前行中用户输入的命令（去掉提示符部分）。
-        /// </summary>
         private string? GetCurrentCommand()
         {
             var lines = richTextBoxTerminal.Lines;
@@ -226,9 +194,6 @@ namespace HMOS_WearToolBox.UserController
             richTextBoxTerminal.SelectedText = "";
         }
 
-        /// <summary>
-        /// 在终端末尾追加输出文本。
-        /// </summary>
         private void AppendOutput(string text)
         {
             if (string.IsNullOrEmpty(text)) return;
@@ -238,9 +203,6 @@ namespace HMOS_WearToolBox.UserController
                 richTextBoxTerminal.AppendText(text);
         }
 
-        /// <summary>
-        /// 执行用户输入的命令。
-        /// </summary>
         private async void ExecuteCommand(string? command)
         {
             // 空命令：直接换行并显示新提示符
@@ -251,8 +213,12 @@ namespace HMOS_WearToolBox.UserController
                 return;
             }
 
+            // 执行前做一次真实检测（不看可能过期的缓存），顺便同步界面状态
+            DeviceConnectionHelper.InvalidateCache();
+            await RefreshConnectionStateAsync();
+
             // 设备未连接时提示并返回
-            if (!IsDeviceConnected())
+            if (!_isConnected)
             {
                 MessageBox.Show("未连接设备，请先连接设备后再执行命令。", "提示", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 AppendPrompt();
@@ -274,21 +240,15 @@ namespace HMOS_WearToolBox.UserController
             AppendOutput(output);
             richTextBoxTerminal.AppendText(Environment.NewLine);
 
-            // 如果启用了命令记录，保存本次执行记录
-            if (_recordEnabled)
-                RecordCommand(command, output);
-
             // 恢复编辑状态，显示新提示符
             richTextBoxTerminal.ReadOnly = false;
             AppendPrompt();
 
             // 重新检查连接状态（可能命令执行后设备断开）
-            CheckConnectionAndUpdateUI();
+            DeviceConnectionHelper.InvalidateCache();
+            await RefreshConnectionStateAsync();
         }
 
-        /// <summary>
-        /// 实际调用 HdcHelper 执行命令。
-        /// </summary>
         private string RunHdcCommand(string userInput)
         {
             // 如果用户输入以 "hdc " 开头，则去掉这个前缀（因为 HdcHelper 会自动添加）
@@ -298,7 +258,9 @@ namespace HMOS_WearToolBox.UserController
 
             try
             {
-                return HdcHelper.RunHdcCommand(args);
+                // 终端是给用户手敲命令用的，可能出现 file send 这类长任务，
+                // 所以给长超时；但依然要有上限，避免命令挂死时永远回不来。
+                return HdcHelper.RunHdcCommand(args, HdcHelper.LongRunningTimeoutMs);
             }
             catch (Exception ex)
             {
@@ -337,7 +299,7 @@ namespace HMOS_WearToolBox.UserController
         /// </summary>
         private void RichTextBox_KeyDown(object? sender, KeyEventArgs e)
         {
-            if (!IsDeviceConnected())
+            if (!_isConnected)
             {
                 // 未连接时禁止任何键盘输入
                 e.SuppressKeyPress = true;
@@ -452,7 +414,7 @@ namespace HMOS_WearToolBox.UserController
                     }
 
                     // 否则尝试粘贴（仅当设备已连接且剪贴板有文本时）
-                    if (IsDeviceConnected() && Clipboard.ContainsText())
+                    if (_isConnected && Clipboard.ContainsText())
                     {
                         string textToPaste = Clipboard.GetText();
                         if (!string.IsNullOrEmpty(textToPaste))
@@ -471,53 +433,5 @@ namespace HMOS_WearToolBox.UserController
             }
         }
 
-        /// <summary>
-        /// 外部调用，用于更新记录配置（是否启用、最大记录数）。
-        /// </summary>
-        public void RefreshSettings(bool recordEnabled, int maxRecords)
-        {
-            _recordEnabled = recordEnabled;
-            _maxRecords = maxRecords > 0 ? maxRecords : 1;
-            // 如果当前记录数超过新的限制，截断多余部分
-            if (_records.Count > _maxRecords)
-                _records.RemoveRange(0, _records.Count - _maxRecords);
-        }
-
-        /// <summary>
-        /// 保存一条命令执行记录。
-        /// </summary>
-        private void RecordCommand(string command, string output)
-        {
-            var record = new CommandRecord
-            {
-                Command = command,
-                Output = output,
-                Timestamp = DateTime.Now
-            };
-            _records.Add(record);
-            // 保证记录数不超过最大限制
-            while (_records.Count > _maxRecords)
-                _records.RemoveAt(0);
-        }
-
-        /// <summary>
-        /// 获取当前保存的所有命令记录（只读）。
-        /// </summary>
-        public IReadOnlyList<CommandRecord> GetRecords() => _records.AsReadOnly();
-
-        /// <summary>
-        /// 清空所有命令记录。
-        /// </summary>
-        public void ClearRecords() => _records.Clear();
-    }
-
-    /// <summary>
-    /// 命令执行记录实体类。
-    /// </summary>
-    public class CommandRecord
-    {
-        public string? Command { get; set; }   // 执行的命令
-        public string? Output { get; set; }    // 命令输出
-        public DateTime Timestamp { get; set; } // 执行时间
     }
 }

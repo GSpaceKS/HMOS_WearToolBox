@@ -2,9 +2,6 @@
 {
     partial class SettingsControl
     {
-        /// <summary> 
-        /// 必需的设计器变量。
-        /// </summary>
         private System.ComponentModel.IContainer components = null;
 
         /// <summary> 
@@ -470,8 +467,8 @@
             // 
             // SettingsControl
             // 
-            AutoScaleDimensions = new SizeF(11F, 24F);
-            AutoScaleMode = AutoScaleMode.Font;
+            AutoScaleDimensions = new SizeF(144F, 144F);
+            AutoScaleMode = AutoScaleMode.Dpi;
             Controls.Add(panelMain);
             Name = "SettingsControl";
             Size = new Size(878, 1017);

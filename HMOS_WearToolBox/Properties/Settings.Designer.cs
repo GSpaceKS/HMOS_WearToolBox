@@ -118,17 +118,5 @@ namespace HMOS_WearToolBox.Properties {
                 this["GlobalFontSize"] = value;
             }
         }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string UserPresets {
-            get {
-                return ((string)(this["UserPresets"]));
-            }
-            set {
-                this["UserPresets"] = value;
-            }
-        }
     }
 }

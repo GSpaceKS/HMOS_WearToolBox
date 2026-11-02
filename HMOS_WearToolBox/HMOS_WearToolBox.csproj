@@ -6,7 +6,7 @@
     <Nullable>enable</Nullable>
     <UseWindowsForms>true</UseWindowsForms>
     <ImplicitUsings>enable</ImplicitUsings>
-    <Version>1.0.0-beta2</Version>
+    <Version>1.0.0-beta3</Version>
     <ApplicationIcon>Resources\Icon\ICON_256.ico</ApplicationIcon>
 	<IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
 	<AllowUnsafeBlocks>True</AllowUnsafeBlocks>
@@ -16,18 +16,12 @@
     <None Remove="Resources\app_names.json" />
     <None Remove="Resources\Fonts\CascadiaCode\CascadiaCode.ttf" />
     <None Remove="Resources\Fonts\CascadiaMono\CascadiaMono.ttf" />
-    <None Remove="Resources\Fonts\Consolas\consola.ttf" />
-    <None Remove="Resources\Fonts\Consolas\consolab.ttf" />
-    <None Remove="Resources\Fonts\Consolas\consolai.ttf" />
-    <None Remove="Resources\Fonts\Consolas\consolaz.ttf" />
     <None Remove="Resources\Fonts\HarmonyOS_Sans_SC\HarmonyOS_Sans_SC_Black.ttf" />
     <None Remove="Resources\Fonts\HarmonyOS_Sans_SC\HarmonyOS_Sans_SC_Bold.ttf" />
     <None Remove="Resources\Fonts\HarmonyOS_Sans_SC\HarmonyOS_Sans_SC_Medium.ttf" />
-    <None Remove="Resources\Fonts\Microsoft_YaHei_UI\msyh.ttc" />
-    <None Remove="Resources\Fonts\Microsoft_YaHei_UI\msyhbd.ttc" />
-    <None Remove="Resources\Fonts\Microsoft_YaHei_UI\msyhl.ttc" />
-    <None Remove="Resources\hdc.exe" />
-    <None Remove="Resources\libusb_shared.dll" />
+    <None Remove="Resources\HDC\hdc.exe" />
+    <None Remove="Resources\HDC\libusb_shared.dll" />
+    <None Remove="Resources\Sign\sign-tool.zip" />
   </ItemGroup>
 
   <ItemGroup>
@@ -38,38 +32,20 @@
     <EmbeddedResource Include="Resources\app_names.json" />
     <EmbeddedResource Include="Resources\Fonts\CascadiaCode\CascadiaCode.ttf" />
     <EmbeddedResource Include="Resources\Fonts\CascadiaMono\CascadiaMono.ttf" />
-    <EmbeddedResource Include="Resources\Fonts\Consolas\consola.ttf" />
-    <EmbeddedResource Include="Resources\Fonts\Consolas\consolab.ttf" />
-    <EmbeddedResource Include="Resources\Fonts\Consolas\consolai.ttf" />
-    <EmbeddedResource Include="Resources\Fonts\Consolas\consolaz.ttf" />
     <EmbeddedResource Include="Resources\Fonts\HarmonyOS_Sans_SC\HarmonyOS_Sans_SC_Black.ttf" />
     <EmbeddedResource Include="Resources\Fonts\HarmonyOS_Sans_SC\HarmonyOS_Sans_SC_Bold.ttf" />
     <EmbeddedResource Include="Resources\Fonts\HarmonyOS_Sans_SC\HarmonyOS_Sans_SC_Medium.ttf" />
-    <EmbeddedResource Include="Resources\Fonts\Microsoft_YaHei_UI\msyh.ttc" />
-    <EmbeddedResource Include="Resources\Fonts\Microsoft_YaHei_UI\msyhbd.ttc" />
-    <EmbeddedResource Include="Resources\Fonts\Microsoft_YaHei_UI\msyhl.ttc" />
-    <EmbeddedResource Include="Resources\HDC\hdc.exe" />
-    <EmbeddedResource Include="Resources\HDC\libusb_shared.dll" />
+    <EmbeddedResource Include="Resources\HDC\hdc.exe" Condition="Exists('Resources\HDC\hdc.exe')" />
+    <EmbeddedResource Include="Resources\HDC\libusb_shared.dll" Condition="Exists('Resources\HDC\libusb_shared.dll')" />
+    <EmbeddedResource Include="Resources\Sign\sign-tool.zip" Condition="Exists('Resources\Sign\sign-tool.zip')" />
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Update="Properties\Resources.Designer.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Resources.resx</DependentUpon>
-    </Compile>
     <Compile Update="Properties\Settings.Designer.cs">
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <AutoGen>True</AutoGen>
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
-  </ItemGroup>
-
-  <ItemGroup>
-    <EmbeddedResource Update="Properties\Resources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
   </ItemGroup>
 
   <ItemGroup>

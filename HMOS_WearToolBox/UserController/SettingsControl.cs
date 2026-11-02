@@ -1,11 +1,9 @@
 ﻿#nullable disable
 using HMOS_WearToolBox.Helper;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
-using System.Reflection;
 using System.Windows.Forms;
 
 namespace HMOS_WearToolBox.UserController
@@ -157,9 +155,6 @@ namespace HMOS_WearToolBox.UserController
             e.DrawFocusRectangle();
         }
 
-        /// <summary>
-        /// 设置下拉框项的高度。
-        /// </summary>
         private void ComboBoxFont_MeasureItem(object sender, MeasureItemEventArgs e)
         {
             e.ItemHeight = (int)(comboBoxFont.Font.Height * 1.2);
@@ -193,9 +188,6 @@ namespace HMOS_WearToolBox.UserController
             }
         }
 
-        /// <summary>
-        /// 加载软件字体下拉框（分组显示）。
-        /// </summary>
         private void LoadGlobalFontComboBox()
         {
             comboBoxGlobalFont.Items.Clear();
@@ -415,9 +407,6 @@ namespace HMOS_WearToolBox.UserController
             }
         }
 
-        /// <summary>
-        /// 恢复终端设置为默认值（不影响全局设置）。
-        /// </summary>
         private void BtnRestoreDefault_Click(object sender, EventArgs e)
         {
             // 默认终端设置

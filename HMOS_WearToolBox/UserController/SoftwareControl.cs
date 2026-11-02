@@ -1,8 +1,6 @@
-﻿#nullable disable
+#nullable disable
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using HMOS_WearToolBox.Helper;
@@ -10,32 +8,17 @@ using HMOS_WearToolBox.Manager;
 
 namespace HMOS_WearToolBox.UserController
 {
-    /// <summary>
-    /// 软件管理控件，提供设备应用列表的查看、安装和卸载功能。
-    /// </summary>
     public partial class SoftwareControl : UserControl
     {
-        // 上一次的连接状态，用于检测连接变化
-        private bool lastConnectionState = false;
-        // 上一次刷新时的连接状态，用于避免重复刷新
-        private bool? lastRefreshConnectionState = null;
-        // 是否正在刷新应用列表，防止并发刷新
-        private bool isRefreshing = false;
-        // 应用包名到显示名称的映射（从嵌入资源加载）
-        private Dictionary<string, string> appNameMap = new Dictionary<string, string>();
+        private Button btnSelfSign;
 
-        /// <summary>
-        /// 初始化软件管理控件。
-        /// </summary>
+        private bool lastConnectionState;
+        private bool? lastRefreshConnectionState;
+        private bool isRefreshing;
+
         public SoftwareControl()
         {
             InitializeComponent();
-
-            // 加载应用名称映射文件
-            LoadAppNameMap();
-
-            // 当父控件变化时，可能控件被重新显示，需要刷新连接状态
-            this.ParentChanged += SoftwareControl_ParentChanged;
 
             // 配置 ListView 显示列
             if (listViewApps.Columns.Count >= 2)
@@ -59,82 +42,80 @@ namespace HMOS_WearToolBox.UserController
             this.Load += SoftwareControl_Load;
             this.VisibleChanged += SoftwareControl_VisibleChanged;
             btnRefresh.Click += btnRefresh_Click;
-            btnInstall.Click += BtnInstall_Click;
             btnUninstall.Click += BtnUninstall_Click;
+
+            // 「自签安装」：第三方 HAP 的包名被别人占着，必须换包名 + 用自己 AGC 的调试证书重签
+            btnSelfSign = new Button
+            {
+                Text = "自签安装"
+            };
+            flowLayoutPanelControl.Controls.Add(btnSelfSign);
+            btnSelfSign.Click += BtnSelfSign_Click;
+
+            // 三个工具栏按钮必须同尺寸：AutoSize 会让「自签安装」按字体实际高度撑开，
+            // 而 Designer 里那两个是固定 112x34，缩放后就会一个高一个矮。
+            StyleToolbarButton(btnRefresh);
+            StyleToolbarButton(btnUninstall);
+            StyleToolbarButton(btnSelfSign);
+
+            // 没连手表时不让点：安装的最后一步必须走到设备上，先关掉省得白填一遍表单。
+            btnSelfSign.Enabled = false;
         }
 
-        /// <summary>
-        /// 从嵌入的资源中加载应用名称映射（JSON 格式）。
-        /// </summary>
-        private void LoadAppNameMap()
+        private static void StyleToolbarButton(Button button)
         {
-            try
-            {
-                var assembly = System.Reflection.Assembly.GetExecutingAssembly();
-                var resourceName = assembly.GetManifestResourceNames()
-                    .FirstOrDefault(r => r.EndsWith("app_names.json", StringComparison.OrdinalIgnoreCase));
-                if (resourceName != null)
-                {
-                    using (var stream = assembly.GetManifestResourceStream(resourceName))
-                    using (var reader = new StreamReader(stream))
-                    {
-                        string json = reader.ReadToEnd();
-                        var map = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, string>>(json);
-                        if (map != null)
-                            appNameMap = map;
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"加载应用名称映射失败: {ex.Message}");
-            }
+            button.AutoSize = false;
+            button.Size = new Size(112, 34);
+            button.Margin = new Padding(3, 3, 3, 3);
+            button.UseVisualStyleBackColor = true;
         }
 
-        /// <summary>
-        /// 控件加载时更新连接状态。
-        /// </summary>
+        private void SetProgressBusy()
+        {
+            this.InvokeIfRequired(() =>
+            {
+                progressBarTask.Style = ProgressBarStyle.Marquee;
+                progressBarTask.Value = 0;
+            });
+        }
+
+        private void SetProgressIdle()
+        {
+            this.InvokeIfRequired(() =>
+            {
+                progressBarTask.Style = ProgressBarStyle.Blocks;
+                progressBarTask.Value = 0;
+            });
+        }
+
+        private async Task FlashProgressCompleteAsync()
+        {
+            this.InvokeIfRequired(() =>
+            {
+                progressBarTask.Style = ProgressBarStyle.Blocks;
+                progressBarTask.Value = 100;
+            });
+            await Task.Delay(500);
+            this.InvokeIfRequired(() => progressBarTask.Value = 0);
+        }
+
         private async void SoftwareControl_Load(object sender, EventArgs e)
         {
             await UpdateConnectStatusAsync();
         }
 
-        /// <summary>
-        /// 父控件改变时，如果控件变为可见，则更新连接状态并可能刷新应用列表。
-        /// </summary>
-        private async void SoftwareControl_ParentChanged(object sender, EventArgs e)
-        {
-            if (this.Parent != null && this.Visible)
-            {
-                bool connected = await UpdateConnectStatusAsync();
-                if (connected && (!lastRefreshConnectionState.HasValue || lastRefreshConnectionState.Value != connected))
-                {
-                    _ = RefreshAppListAsync();
-                    lastRefreshConnectionState = connected;
-                }
-            }
-        }
-
-        /// <summary>
-        /// 控件可见性改变时，如果变为可见且已连接，则刷新应用列表。
-        /// </summary>
         private async void SoftwareControl_VisibleChanged(object sender, EventArgs e)
         {
-            bool connected = await UpdateConnectStatusAsync();
+            if (!Visible) return;
 
-            if (this.Visible && connected)
+            bool connected = await UpdateConnectStatusAsync();
+            if (connected && lastRefreshConnectionState != true)
             {
-                if (!lastRefreshConnectionState.HasValue || lastRefreshConnectionState.Value != connected)
-                {
-                    _ = RefreshAppListAsync();
-                    lastRefreshConnectionState = connected;
-                }
+                lastRefreshConnectionState = true;
+                await RefreshAppListAsync();
             }
         }
 
-        /// <summary>
-        /// 外部调用的刷新连接状态方法，用于手动更新连接状态和界面。
-        /// </summary>
         public async void RefreshConnectionStatus()
         {
             bool becameConnected = await UpdateConnectStatusAsync();
@@ -146,9 +127,6 @@ namespace HMOS_WearToolBox.UserController
             }
         }
 
-        /// <summary>
-        /// 强制刷新应用列表（例如重连后调用）。
-        /// </summary>
         public void ForceRefresh()
         {
             if (this.Visible && IsDeviceConnected())
@@ -157,9 +135,6 @@ namespace HMOS_WearToolBox.UserController
             }
         }
 
-        /// <summary>
-        /// 更新连接状态并返回是否变为已连接。
-        /// </summary>
         private async Task<bool> UpdateConnectStatusAsync()
         {
             bool connected = await IsDeviceConnectedAsync();
@@ -174,16 +149,16 @@ namespace HMOS_WearToolBox.UserController
                     lblConnectStatus.Text = "已连接";
                     lblConnectStatus.ForeColor = System.Drawing.Color.Green;
                     btnRefresh.Enabled = true;
-                    btnInstall.Enabled = true;
                     btnUninstall.Enabled = true;
+                    btnSelfSign.Enabled = true;
                 }
                 else
                 {
                     lblConnectStatus.Text = "未连接";
                     lblConnectStatus.ForeColor = System.Drawing.Color.Red;
                     btnRefresh.Enabled = false;
-                    btnInstall.Enabled = false;
                     btnUninstall.Enabled = false;
+                    btnSelfSign.Enabled = false;
                     ClearAppList();
                 }
             });
@@ -191,17 +166,11 @@ namespace HMOS_WearToolBox.UserController
             return becameConnected;
         }
 
-        /// <summary>
-        /// 异步检查设备连接状态。
-        /// </summary>
         private async Task<bool> IsDeviceConnectedAsync()
         {
             return await Task.Run(() => IsDeviceConnected());
         }
 
-        /// <summary>
-        /// 同步检查设备连接状态（通过 DeviceConnectionHelper）。
-        /// </summary>
         private bool IsDeviceConnected()
         {
             try
@@ -215,9 +184,6 @@ namespace HMOS_WearToolBox.UserController
             }
         }
 
-        /// <summary>
-        /// 刷新按钮点击事件：刷新应用列表。
-        /// </summary>
         private async void btnRefresh_Click(object sender, EventArgs e)
         {
             if (!await IsDeviceConnectedAsync())
@@ -228,106 +194,17 @@ namespace HMOS_WearToolBox.UserController
             await RefreshAppListAsync();
         }
 
-        /// <summary>
-        /// 安装按钮点击事件：选择 HAP 文件并安装到设备。
-        /// </summary>
-        private async void BtnInstall_Click(object sender, EventArgs e)
+        private async void BtnSelfSign_Click(object sender, EventArgs e)
         {
-            if (!await IsDeviceConnectedAsync())
+            using (SelfSignForm form = new SelfSignForm())
             {
-                MessageBox.Show("请先连接设备", "提示", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
+                form.ShowDialog(this);
             }
 
-            using (OpenFileDialog ofd = new OpenFileDialog())
-            {
-                ofd.Title = "选择要安装的 HAP 文件";
-                ofd.Filter = "HAP文件|*.hap|所有文件|*.*";
-                ofd.Multiselect = false;
-                if (ofd.ShowDialog() != DialogResult.OK)
-                    return;
-
-                string filePath = ofd.FileName;
-                if (MessageBox.Show($"确定要安装 {Path.GetFileName(filePath)} 吗？", "确认安装", MessageBoxButtons.YesNo) != DialogResult.Yes)
-                    return;
-
-                // 开始安装，禁用 UI 操作
-                this.Cursor = Cursors.WaitCursor;
-                btnInstall.Enabled = false;
-                btnRefresh.Enabled = false;
-                btnUninstall.Enabled = false;
-
-                this.InvokeIfRequired(() =>
-                {
-                    progressBarTask.Style = ProgressBarStyle.Marquee;  // 安装过程中使用滚动条
-                    progressBarTask.Value = 0;
-                });
-
-                try
-                {
-                    // 推送文件到设备
-                    string remotePath = "/data/local/tmp/" + Path.GetFileName(filePath);
-                    string pushResult = await Task.Run(() => HdcHelper.RunHdcCommand($"file send {filePath} {remotePath}"));
-                    if (!pushResult.Contains("success") && !pushResult.Contains("Success"))
-                    {
-                        MessageBox.Show($"文件推送失败：{pushResult}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        this.InvokeIfRequired(() =>
-                        {
-                            progressBarTask.Style = ProgressBarStyle.Blocks;
-                            progressBarTask.Value = 0;
-                        });
-                        return;
-                    }
-
-                    // 执行安装命令
-                    string installResult = await Task.Run(() => HdcHelper.RunHdcCommand($"install {remotePath}"));
-                    if (installResult.Contains("success") || installResult.Contains("Success"))
-                    {
-                        MessageBox.Show("安装成功", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                        this.InvokeIfRequired(() =>
-                        {
-                            progressBarTask.Style = ProgressBarStyle.Blocks;
-                            progressBarTask.Value = 100;
-                        });
-                        await Task.Delay(500);
-                        this.InvokeIfRequired(() => progressBarTask.Value = 0);
-                        await RefreshAppListAsync();   // 刷新应用列表
-                    }
-                    else
-                    {
-                        MessageBox.Show($"安装失败：{installResult}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        this.InvokeIfRequired(() =>
-                        {
-                            progressBarTask.Style = ProgressBarStyle.Blocks;
-                            progressBarTask.Value = 0;
-                        });
-                    }
-
-                    // 清理临时文件
-                    await Task.Run(() => HdcHelper.RunHdcCommand($"shell rm {remotePath}"));
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show($"安装出错：{ex.Message}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    this.InvokeIfRequired(() =>
-                    {
-                        progressBarTask.Style = ProgressBarStyle.Blocks;
-                        progressBarTask.Value = 0;
-                    });
-                }
-                finally
-                {
-                    this.Cursor = Cursors.Default;
-                    btnInstall.Enabled = true;
-                    btnRefresh.Enabled = true;
-                    btnUninstall.Enabled = true;
-                }
-            }
+            if (await IsDeviceConnectedAsync())
+                await RefreshAppListAsync();
         }
 
-        /// <summary>
-        /// 卸载按钮点击事件：卸载选中的应用。
-        /// </summary>
         private async void BtnUninstall_Click(object sender, EventArgs e)
         {
             if (!await IsDeviceConnectedAsync())
@@ -356,13 +233,8 @@ namespace HMOS_WearToolBox.UserController
             this.Cursor = Cursors.WaitCursor;
             btnUninstall.Enabled = false;
             btnRefresh.Enabled = false;
-            btnInstall.Enabled = false;
 
-            this.InvokeIfRequired(() =>
-            {
-                progressBarTask.Style = ProgressBarStyle.Marquee;
-                progressBarTask.Value = 0;
-            });
+            SetProgressBusy();
 
             try
             {
@@ -370,46 +242,28 @@ namespace HMOS_WearToolBox.UserController
                 if (result.Contains("success") || result.Contains("Success"))
                 {
                     MessageBox.Show("卸载成功", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    this.InvokeIfRequired(() =>
-                    {
-                        progressBarTask.Style = ProgressBarStyle.Blocks;
-                        progressBarTask.Value = 100;
-                    });
-                    await Task.Delay(500);
-                    this.InvokeIfRequired(() => progressBarTask.Value = 0);
-                    await RefreshAppListAsync();   // 刷新应用列表
+                    await FlashProgressCompleteAsync();
+                    await RefreshAppListAsync();
                 }
                 else
                 {
                     MessageBox.Show($"卸载失败：{result}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    this.InvokeIfRequired(() =>
-                    {
-                        progressBarTask.Style = ProgressBarStyle.Blocks;
-                        progressBarTask.Value = 0;
-                    });
+                    SetProgressIdle();
                 }
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"卸载出错：{ex.Message}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                this.InvokeIfRequired(() =>
-                {
-                    progressBarTask.Style = ProgressBarStyle.Blocks;
-                    progressBarTask.Value = 0;
-                });
+                SetProgressIdle();
             }
             finally
             {
                 this.Cursor = Cursors.Default;
                 btnUninstall.Enabled = true;
                 btnRefresh.Enabled = true;
-                btnInstall.Enabled = true;
             }
         }
 
-        /// <summary>
-        /// 异步刷新应用列表，从设备获取所有已安装应用并显示。
-        /// </summary>
         private DateTime _lastRefreshTime = DateTime.MinValue;
         private async Task RefreshAppListAsync()
         {
@@ -426,32 +280,19 @@ namespace HMOS_WearToolBox.UserController
                 return;
             }
 
-            // 显示进度条为滚动状态
-            this.InvokeIfRequired(() =>
-            {
-                progressBarTask.Style = ProgressBarStyle.Marquee;
-                progressBarTask.Value = 0;
-            });
+            SetProgressBusy();
 
             this.Cursor = Cursors.WaitCursor;
             btnRefresh.Enabled = false;
-            btnInstall.Enabled = false;
             btnUninstall.Enabled = false;
 
             try
             {
                 string output = await Task.Run(() => HdcHelper.RunHdcCommand("shell bm dump -a"));
-                var apps = ParseAppList(output);
+                var apps = await ParseAppListAsync(output);
                 DisplayApps(apps);
 
-                // 完成刷新，将进度条设为完成
-                this.InvokeIfRequired(() =>
-                {
-                    progressBarTask.Style = ProgressBarStyle.Blocks;
-                    progressBarTask.Value = 100;
-                });
-                await Task.Delay(500);
-                this.InvokeIfRequired(() => progressBarTask.Value = 0);
+                await FlashProgressCompleteAsync();
 
                 if (await IsDeviceConnectedAsync())
                     lastRefreshConnectionState = true;
@@ -459,81 +300,42 @@ namespace HMOS_WearToolBox.UserController
             catch (Exception ex)
             {
                 MessageBox.Show($"获取应用列表失败：{ex.Message}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                this.InvokeIfRequired(() =>
-                {
-                    progressBarTask.Style = ProgressBarStyle.Blocks;
-                    progressBarTask.Value = 0;
-                });
+                SetProgressIdle();
             }
             finally
             {
                 this.Cursor = Cursors.Default;
                 btnRefresh.Enabled = true;
-                btnInstall.Enabled = true;
                 btnUninstall.Enabled = true;
                 isRefreshing = false;
             }
         }
 
-        /// <summary>
-        /// 解析应用列表输出，支持两种格式（bm dump -a 或 pm list packages）。
-        /// </summary>
-        private List<AppInfo> ParseAppList(string output)
+        private async Task<List<AppInfo>> ParseAppListAsync(string output)
         {
             var apps = new List<AppInfo>();
             var lines = output.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
 
-            // 检查输出是否包含键值对格式（BundleName:）
-            bool isKeyValueFormat = lines.Any(l => l.Contains("BundleName:"));
-
-            if (isKeyValueFormat)
+            // bm dump -a 的输出是「ID: N」分段，每段后面跟一个包名
+            bool foundFirst = false;
+            foreach (var line in lines)
             {
-                AppInfo current = null;
-                foreach (var line in lines)
+                string trimmed = line.Trim();
+                if (!foundFirst && trimmed.StartsWith("ID:"))
                 {
-                    if (line.StartsWith("BundleName:"))
-                    {
-                        if (current != null)
-                            apps.Add(current);
-                        current = new AppInfo();
-                        current.PackageName = line.Substring("BundleName:".Length).Trim();
-                    }
-                    else if (line.StartsWith("Label:") && current != null)
-                    {
-                        current.AppName = line.Substring("Label:".Length).Trim();
-                    }
+                    foundFirst = true;
+                    continue;
                 }
-                if (current != null)
-                    apps.Add(current);
-            }
-            else
-            {
-                // 旧格式：每个应用一行，以 "ID:" 分隔
-                bool foundFirst = false;
-                foreach (var line in lines)
-                {
-                    string trimmed = line.Trim();
-                    if (!foundFirst && trimmed.StartsWith("ID:"))
-                    {
-                        foundFirst = true;
-                        continue;
-                    }
-                    if (foundFirst && !string.IsNullOrWhiteSpace(trimmed))
-                    {
-                        if (trimmed.StartsWith("ID:")) continue;
-                        apps.Add(new AppInfo
-                        {
-                            PackageName = trimmed,
-                            AppName = trimmed
-                        });
-                    }
-                }
+                if (foundFirst && trimmed.Length > 0 && !trimmed.StartsWith("ID:"))
+                    apps.Add(new AppInfo { PackageName = trimmed, AppName = trimmed });
             }
 
             // 如果仍未获取到任何应用，尝试使用 pm list packages -3 获取第三方应用列表
             if (apps.Count == 0)
             {
-                string packageOutput = HdcHelper.RunHdcCommand("shell pm list packages -3");
+                // 这里必须放到后台线程：本方法是 await 之后的续体，默认跑在 UI 线程上，
+                // 直接调用会阻塞界面（原来的写法就是这样）。
+                string packageOutput = await Task.Run(() => HdcHelper.RunHdcCommand("shell pm list packages -3"));
                 var packageLines = packageOutput.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
                 foreach (var line in packageLines)
                 {
@@ -545,21 +347,12 @@ namespace HMOS_WearToolBox.UserController
                 }
             }
 
-            // 使用映射表将包名转换为可读的应用名称
             foreach (var app in apps)
-            {
-                if (appNameMap.TryGetValue(app.PackageName, out string displayName))
-                    app.AppName = displayName;
-                else
-                    app.AppName = "未知";
-            }
+                app.AppName = AppNameResolver.Resolve(app.PackageName);
 
             return apps;
         }
 
-        /// <summary>
-        /// 将应用列表显示在 ListView 中。
-        /// </summary>
         private void DisplayApps(List<AppInfo> apps)
         {
             // 安全更新 ListView
@@ -579,17 +372,11 @@ namespace HMOS_WearToolBox.UserController
             });
         }
 
-        /// <summary>
-        /// 清空应用列表显示。
-        /// </summary>
         public void ClearAppList()
         {
             this.InvokeIfRequired(() => listViewApps.Items.Clear());
         }
 
-        /// <summary>
-        /// 内部应用信息类，用于存储应用名称和包名。
-        /// </summary>
         private class AppInfo
         {
             public string AppName { get; set; } = "";
@@ -597,14 +384,8 @@ namespace HMOS_WearToolBox.UserController
         }
     }
 
-    /// <summary>
-    /// 为 Control 提供扩展方法，用于安全地跨线程调用 UI 操作。
-    /// </summary>
     public static class ControlExtensions
     {
-        /// <summary>
-        /// 如果当前线程不是控件的创建线程，则使用 BeginInvoke 执行操作；否则直接执行。
-        /// </summary>
         public static void InvokeIfRequired(this Control control, Action action)
         {
             if (control.InvokeRequired)

@@ -13,26 +13,32 @@ namespace HMOS_WearToolBox.DataParsers
 
     public static class BatteryParser
     {
-        public static BatteryInfo Parse(string output)
+        public static BatteryInfo Parse(string? output)
         {
-            var info = new BatteryInfo();
+            BatteryInfo info = new BatteryInfo();
+            if (string.IsNullOrWhiteSpace(output))
+                return info;
 
-            var match = Regex.Match(output, @"capacity:\s*(\d+)");
-            if (match.Success) info.Capacity = int.Parse(match.Groups[1].Value);
-
-            match = Regex.Match(output, @"voltage:\s*(\d+)");
-            if (match.Success) info.Voltage = int.Parse(match.Groups[1].Value);
-
-            match = Regex.Match(output, @"chargingStatus:\s*(\d+)");
-            if (match.Success) info.ChargingStatus = int.Parse(match.Groups[1].Value);
-
-            match = Regex.Match(output, @"healthState:\s*(\d+)");
-            if (match.Success) info.HealthState = int.Parse(match.Groups[1].Value);
-
-            match = Regex.Match(output, @"temperature:\s*(\d+)");
-            if (match.Success) info.Temperature = int.Parse(match.Groups[1].Value);
+            info.Capacity = ExtractInt(output, @"capacity:\s*(-?\d+)");
+            info.Voltage = ExtractInt(output, @"voltage:\s*(-?\d+)");
+            info.ChargingStatus = ExtractInt(output, @"chargingStatus:\s*(-?\d+)");
+            info.HealthState = ExtractInt(output, @"healthState:\s*(-?\d+)");
+            info.Temperature = ExtractInt(output, @"temperature:\s*(-?\d+)");
 
             return info;
+        }
+
+        /// <summary>
+        /// 按模式提取整数。匹配不到、或字段不是合法数字时返回 0，
+        /// 不用 int.Parse —— 设备固件版本不同时输出格式会变，抛异常会直接打断整次刷新。
+        /// </summary>
+        private static int ExtractInt(string output, string pattern)
+        {
+            Match match = Regex.Match(output, pattern);
+            if (!match.Success)
+                return 0;
+
+            return int.TryParse(match.Groups[1].Value, out int value) ? value : 0;
         }
     }
 }

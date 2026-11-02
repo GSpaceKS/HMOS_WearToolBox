@@ -2,9 +2,6 @@
 {
     partial class SoftwareControl
     {
-        /// <summary> 
-        /// 必需的设计器变量。
-        /// </summary>
         private System.ComponentModel.IContainer components = null;
 
         /// <summary> 
@@ -32,7 +29,6 @@
             lblConnectStatusC = new Label();
             lblConnectStatus = new Label();
             btnRefresh = new Button();
-            btnInstall = new Button();
             btnUninstall = new Button();
             tableLayoutPanelNotices = new TableLayoutPanel();
             groupBoxTask = new GroupBox();
@@ -55,7 +51,6 @@
             flowLayoutPanelControl.Controls.Add(lblConnectStatusC);
             flowLayoutPanelControl.Controls.Add(lblConnectStatus);
             flowLayoutPanelControl.Controls.Add(btnRefresh);
-            flowLayoutPanelControl.Controls.Add(btnInstall);
             flowLayoutPanelControl.Controls.Add(btnUninstall);
             flowLayoutPanelControl.Dock = DockStyle.Top;
             flowLayoutPanelControl.Location = new Point(0, 0);
@@ -96,15 +91,6 @@
             btnRefresh.TabIndex = 0;
             btnRefresh.Text = "刷新列表";
             btnRefresh.UseVisualStyleBackColor = true;
-            // 
-            // btnInstall
-            // 
-            btnInstall.Location = new Point(302, 3);
-            btnInstall.Name = "btnInstall";
-            btnInstall.Size = new Size(112, 34);
-            btnInstall.TabIndex = 1;
-            btnInstall.Text = "安装软件";
-            btnInstall.UseVisualStyleBackColor = true;
             // 
             // btnUninstall
             // 
@@ -219,8 +205,8 @@
             // 
             // SoftwareControl
             // 
-            AutoScaleDimensions = new SizeF(11F, 24F);
-            AutoScaleMode = AutoScaleMode.Font;
+            AutoScaleDimensions = new SizeF(144F, 144F);
+            AutoScaleMode = AutoScaleMode.Dpi;
             Controls.Add(panelMain);
             Name = "SoftwareControl";
             Size = new Size(878, 1017);
@@ -241,7 +227,6 @@
         private Label lblConnectStatusC;
         private Label lblConnectStatus;
         private Button btnRefresh;
-        private Button btnInstall;
         private Button btnUninstall;
         private TableLayoutPanel tableLayoutPanelNotices;
         private Label labelNotice_1;

@@ -98,5 +98,15 @@
   "com.ohos.sceneboard": "场景联动",
   "com.ohos.settingsdata": "设置数据",
   "com.ohos.telephonydataability": "电话数据",
-  "com.ohos.useriam.authwidget": "身份认证"
+  "com.ohos.useriam.authwidget": "身份认证",
+  "com.airbrowser.app": "Air浏览器",
+  "com.baicizhan.bcz.wearable": "百词斩",
+  "com.baidu.std_wear": "百度",
+  "com.bilibili.bilithings.watch": "哔哩哔哩",
+  "com.crab.acto.wearable": "ACTO",
+  "com.huawei.hmos.parentcontrol": "家长控制",
+  "com.huawei.msdp.hmringgenerator": "戒指手势服务",
+  "com.tencent.workbuddyWatch": "腾讯WorkBuddy",
+  "me.lake.wristlab": "腕上实验室",
+  "ohos.global.systemres": "系统资源"
 }

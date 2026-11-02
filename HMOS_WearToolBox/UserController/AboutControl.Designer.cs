@@ -2,9 +2,6 @@
 {
     partial class AboutControl
     {
-        /// <summary> 
-        /// 必需的设计器变量。
-        /// </summary>
         private System.ComponentModel.IContainer components = null;
 
         /// <summary> 
@@ -211,7 +208,7 @@
             // 
             labelSoftwareNameenUS.AutoSize = true;
             labelSoftwareNameenUS.Dock = DockStyle.Fill;
-            labelSoftwareNameenUS.Font = new Font("Microsoft YaHei UI", 35F, FontStyle.Bold);
+            labelSoftwareNameenUS.Font = new Font("Microsoft YaHei UI", 24F, FontStyle.Bold);
             labelSoftwareNameenUS.Location = new Point(8, 5);
             labelSoftwareNameenUS.Name = "labelSoftwareNameenUS";
             labelSoftwareNameenUS.Padding = new Padding(10);
@@ -234,8 +231,8 @@
             // 
             // AboutControl
             // 
-            AutoScaleDimensions = new SizeF(11F, 24F);
-            AutoScaleMode = AutoScaleMode.Font;
+            AutoScaleDimensions = new SizeF(144F, 144F);
+            AutoScaleMode = AutoScaleMode.Dpi;
             Controls.Add(panelMain);
             Name = "AboutControl";
             Size = new Size(878, 1017);

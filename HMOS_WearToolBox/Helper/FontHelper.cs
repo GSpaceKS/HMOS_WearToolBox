@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Text;
 using System.IO;
-using System.Linq;
 using System.Reflection;
+using System.Windows.Forms;
 
 namespace HMOS_WearToolBox.Helper
 {
@@ -14,12 +14,20 @@ namespace HMOS_WearToolBox.Helper
     public static class FontHelper
     {
         // 私有字体集合，用于存储从资源加载的字体
-        private static PrivateFontCollection _privateFonts = new PrivateFontCollection();
+        private static readonly PrivateFontCollection _privateFonts = new PrivateFontCollection();
 
-        /// <summary>
-        /// 从嵌入资源加载字体文件，并将其添加到私有字体集合中。
-        /// </summary>
-        public static string LoadEmbeddedFont(string resourcePath)
+        /// <summary>系统 UI 字体的候选列表（按优先级）。</summary>
+        private static readonly string[] SystemUiFontCandidates =
+        {
+            "Microsoft YaHei UI",
+            "Microsoft YaHei",
+            "微软雅黑",
+            "Segoe UI",
+            "Tahoma"
+        };
+
+        /// <summary>从嵌入资源加载字体，失败时返回 null。</summary>
+        public static string? LoadEmbeddedFont(string resourcePath)
         {
             try
             {
@@ -49,26 +57,21 @@ namespace HMOS_WearToolBox.Helper
             }
         }
 
-        /// <summary>
-        /// 初始化所有预定义的嵌入字体（在程序启动时调用）。
-        /// </summary>
         public static void InitializeEmbeddedFonts()
         {
-            // 列出所有需要嵌入的字体资源路径
+            // 只嵌入可以随程序再分发的字体：
+            //   Cascadia Code / Mono —— SIL OFL 1.1
+            //   HarmonyOS Sans SC   —— 华为授权
+            // 微软雅黑（msyh*.ttc）和 Consolas 是微软专有字体，只授权在 Windows 上使用，
+            // 不允许随应用再分发，因此没有打进仓库。它们在 Windows 上都是系统自带字体，
+            // GetFont 会直接从系统字体里取到，观感不受影响。
             string[] embeddedResources = new[]
             {
                 "HMOS_WearToolBox.Resources.Fonts.CascadiaCode.CascadiaCode.ttf",
                 "HMOS_WearToolBox.Resources.Fonts.CascadiaMono.CascadiaMono.ttf",
-                "HMOS_WearToolBox.Resources.Fonts.Consolas.consola.ttf",
-                "HMOS_WearToolBox.Resources.Fonts.Consolas.consolab.ttf",
-                "HMOS_WearToolBox.Resources.Fonts.Consolas.consolai.ttf",
-                "HMOS_WearToolBox.Resources.Fonts.Consolas.consolaz.ttf",
                 "HMOS_WearToolBox.Resources.Fonts.HarmonyOS_Sans_SC.HarmonyOS_Sans_SC_Black.ttf",
                 "HMOS_WearToolBox.Resources.Fonts.HarmonyOS_Sans_SC.HarmonyOS_Sans_SC_Bold.ttf",
-                "HMOS_WearToolBox.Resources.Fonts.HarmonyOS_Sans_SC.HarmonyOS_Sans_SC_Medium.ttf",
-                "HMOS_WearToolBox.Resources.Fonts.Microsoft_YaHei_UI.msyh.ttc",
-                "HMOS_WearToolBox.Resources.Fonts.Microsoft_YaHei_UI.msyhbd.ttc",
-                "HMOS_WearToolBox.Resources.Fonts.Microsoft_YaHei_UI.msyhl.ttc"
+                "HMOS_WearToolBox.Resources.Fonts.HarmonyOS_Sans_SC.HarmonyOS_Sans_SC_Medium.ttf"
             };
 
             foreach (var res in embeddedResources)
@@ -77,9 +80,6 @@ namespace HMOS_WearToolBox.Helper
             }
         }
 
-        /// <summary>
-        /// 获取所有已加载的嵌入字体名称列表。
-        /// </summary>
         public static List<string> GetEmbeddedFontNames()
         {
             var names = new List<string>();
@@ -91,38 +91,22 @@ namespace HMOS_WearToolBox.Helper
         }
 
         /// <summary>
-        /// 根据字体名称获取字体实例（优先系统字体，其次嵌入字体，最后回退到微软雅黑UI）。
+        /// 根据字体名称获取字体实例（优先系统字体，其次嵌入字体，最后回退到系统 UI 字体）。
         /// </summary>
         public static Font GetFont(string fontName, float fontSize)
         {
             // 1. 尝试从系统字体中获取
-            try
-            {
-                Font systemFont = new Font(fontName, fontSize);
-                // 如果系统字体实际名称与请求一致，则有效
-                if (systemFont.Name == fontName)
-                    return systemFont;
-                systemFont.Dispose();
-            }
-            catch { }
+            Font? systemFont = TryCreateSystemFont(fontName, fontSize);
+            if (systemFont != null)
+                return systemFont;
 
             // 2. 尝试从嵌入字体中查找
-            foreach (FontFamily family in _privateFonts.Families)
-            {
-                if (family.Name == fontName)
-                    return new Font(family, fontSize);
-            }
+            Font? embeddedFont = TryCreateEmbeddedFont(fontName, fontSize);
+            if (embeddedFont != null)
+                return embeddedFont;
 
-            // 3. 回退到微软雅黑UI（若系统中不存在则使用系统默认字体）
-            try
-            {
-                return new Font("微软雅黑UI", fontSize);
-            }
-            catch
-            {
-                // 最后的保底方案
-                return new Font("Tahoma", fontSize);
-            }
+            // 3. 回退到系统 UI 字体
+            return CreateFirstAvailableFont(fontSize);
         }
 
         /// <summary>
@@ -142,15 +126,70 @@ namespace HMOS_WearToolBox.Helper
                 if (family.Name.Contains("HarmonyOS"))
                     return new Font(family, fontSize);
             }
-            // 回退到系统字体
+            // 回退到系统 UI 字体
+            return CreateFirstAvailableFont(fontSize);
+        }
+
+        private static Font? TryCreateSystemFont(string fontName, float fontSize)
+        {
+            if (string.IsNullOrWhiteSpace(fontName))
+                return null;
+
+            // 先确认字体真的存在。不能用 new Font(name, size) 来判断：
+            // 名字不存在时它既不报错也不抛异常，而是静默给你一个 Microsoft Sans Serif。
             try
             {
-                return new Font("微软雅黑UI", fontSize);
+                using FontFamily probe = new FontFamily(fontName);
             }
             catch
             {
-                return new Font("Tahoma", fontSize);
+                return null;
             }
+
+            // 也不能拿 font.Name 和传入的名字比字符串：GDI+ 会把 "Microsoft YaHei"
+            // 解析成它的本地化名 "微软雅黑"，名字对不上但字体其实是对的。
+            try
+            {
+                return new Font(fontName, fontSize);
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        private static Font? TryCreateEmbeddedFont(string fontName, float fontSize)
+        {
+            if (string.IsNullOrWhiteSpace(fontName))
+                return null;
+
+            foreach (FontFamily family in _privateFonts.Families)
+            {
+                if (string.Equals(family.Name, fontName, StringComparison.OrdinalIgnoreCase))
+                    return new Font(family, fontSize);
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// 依次尝试候选列表，返回第一个系统里真实存在的字体。
+        /// </summary>
+        private static Font CreateFirstAvailableFont(float fontSize)
+        {
+            foreach (string name in SystemUiFontCandidates)
+            {
+                Font? font = TryCreateSystemFont(name, fontSize);
+                if (font != null)
+                    return font;
+            }
+
+            // 理论上到不了这里；真到了就用系统消息框字体，再不行用 GDI+ 的通用无衬线字体。
+            Font? uiFont = SystemFonts.MessageBoxFont ?? SystemFonts.DefaultFont;
+            if (uiFont != null)
+                return (Font)uiFont.Clone();
+
+            return new Font(FontFamily.GenericSansSerif, fontSize);
         }
     }
 }

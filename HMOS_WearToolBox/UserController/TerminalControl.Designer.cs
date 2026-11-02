@@ -2,9 +2,6 @@
 {
     partial class TerminalControl
     {
-        /// <summary> 
-        /// 必需的设计器变量。
-        /// </summary>
         private System.ComponentModel.IContainer components = null;
 
         /// <summary> 
@@ -45,8 +42,8 @@
             // 
             // TerminalControl
             // 
-            AutoScaleDimensions = new SizeF(11F, 24F);
-            AutoScaleMode = AutoScaleMode.Font;
+            AutoScaleDimensions = new SizeF(144F, 144F);
+            AutoScaleMode = AutoScaleMode.Dpi;
             Controls.Add(richTextBoxTerminal);
             Name = "TerminalControl";
             Size = new Size(878, 1017);
